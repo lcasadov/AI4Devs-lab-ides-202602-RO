@@ -1,6 +1,10 @@
+import fs from 'fs';
+import path from 'path';
 import { ICandidateRepository } from '../../domain/repositories/candidate.repository.interface';
 import { Candidate, CreateCandidateDto } from '../../domain/models/candidate';
 import { getPrismaClient } from '../database/prisma-client';
+
+const uploadsDir = path.resolve(__dirname, '../../../../uploads');
 
 const candidateSelect = {
   id: true,
@@ -62,6 +66,23 @@ export class CandidateRepository implements ICandidateRepository {
     });
 
     return record ? this.mapToCandidate(record) : null;
+  }
+
+  async delete(id: number): Promise<void> {
+    // Retrieve the CV filename before deleting the record
+    const record = await this.prisma.candidate.findUnique({
+      where: { id },
+      select: { cvFileName: true },
+    });
+
+    await this.prisma.candidate.delete({ where: { id } });
+
+    if (record?.cvFileName) {
+      const cvPath = path.join(uploadsDir, record.cvFileName);
+      if (fs.existsSync(cvPath)) {
+        fs.unlinkSync(cvPath);
+      }
+    }
   }
 
   private mapToCandidate(record: {

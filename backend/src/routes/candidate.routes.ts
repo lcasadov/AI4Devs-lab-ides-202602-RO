@@ -3,6 +3,7 @@ import {
   createCandidate,
   getAllCandidates,
   getCandidateById,
+  deleteCandidate,
   upload,
 } from '../presentation/controllers/candidate.controller';
 
@@ -192,5 +193,36 @@ router.get('/', getAllCandidates);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/:id', getCandidateById);
+
+/**
+ * @swagger
+ * /candidates/{id}:
+ *   delete:
+ *     summary: Delete a candidate by ID (GDPR right to erasure)
+ *     tags: [Candidates]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Candidate ID
+ *     responses:
+ *       204:
+ *         description: Candidate deleted successfully
+ *       404:
+ *         description: Candidate not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.delete('/:id', deleteCandidate);
 
 export default router;

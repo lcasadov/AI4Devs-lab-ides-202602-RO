@@ -9,6 +9,7 @@ function createMockRepository(): jest.Mocked<ICandidateRepository> {
     findAll: jest.fn(),
     findById: jest.fn(),
     findByEmail: jest.fn(),
+    delete: jest.fn(),
   };
 }
 
@@ -66,7 +67,7 @@ describe('CandidateService.create', () => {
     const thrown = await service.create(baseDto).catch((e) => e);
     expect(thrown).toBeDefined();
     expect(thrown.name).toBe('DuplicateEmailError');
-    expect(thrown.message).toMatch(/already exists/i);
+    expect(thrown.message).toMatch(/already in use/i);
     expect(repo.create).not.toHaveBeenCalled();
   });
 

@@ -120,7 +120,7 @@ describe('POST /candidates', () => {
     // Assert
     expect(res.status).toBe(409);
     expect(res.body).toHaveProperty('error');
-    expect(res.body.error).toMatch(/already exists/i);
+    expect(res.body.error).toMatch(/already in use/i);
   });
 
   it('returns 500 without exposing internal Prisma error details when DB fails', async () => {

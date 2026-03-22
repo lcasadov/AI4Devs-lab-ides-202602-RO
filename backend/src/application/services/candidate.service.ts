@@ -2,8 +2,8 @@ import { ICandidateRepository } from '../../domain/repositories/candidate.reposi
 import { Candidate, CreateCandidateDto } from '../../domain/models/candidate';
 
 export class DuplicateEmailError extends Error {
-  constructor(email: string) {
-    super(`A candidate with email '${email}' already exists`);
+  constructor(_email: string) {
+    super(`Email address is already in use`);
     this.name = 'DuplicateEmailError';
   }
 }
@@ -42,5 +42,13 @@ export class CandidateService {
       throw new NotFoundError(id);
     }
     return candidate;
+  }
+
+  async delete(id: number): Promise<void> {
+    const candidate = await this.candidateRepository.findById(id);
+    if (!candidate) {
+      throw new NotFoundError(id);
+    }
+    await this.candidateRepository.delete(id);
   }
 }

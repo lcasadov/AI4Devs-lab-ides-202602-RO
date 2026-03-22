@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import multer, { StorageEngine, FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { z } from 'zod';
 import { CandidateService, DuplicateEmailError, NotFoundError } from '../../application/services/candidate.service';
 import { CandidateRepository } from '../../infrastructure/repositories/candidate.repository';
 import { CreateCandidateDto } from '../../domain/models/candidate';
@@ -49,29 +50,37 @@ export const upload = multer({
 const candidateRepository = new CandidateRepository();
 const candidateService = new CandidateService(candidateRepository);
 
+// Zod schema for input validation
+const createCandidateSchema = z.object({
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
+  email: z.string().email().max(255),
+  phone: z.string().max(20).optional(),
+  address: z.string().max(500).optional(),
+  education: z.string().max(5000).optional(),
+  workExperience: z.string().max(5000).optional(),
+});
+
 export async function createCandidate(req: Request, res: Response): Promise<void> {
   try {
-    const { firstName, lastName, email, phone, address, education, workExperience } = req.body as Record<string, unknown>;
+    const parsed = createCandidateSchema.safeParse(req.body);
+    if (!parsed.success) {
+      const firstError = parsed.error.errors[0];
+      const field = firstError?.path.join('.') ?? '';
+      const message = firstError?.message ?? 'Validation error';
+      const errorMsg = field ? `${field}: ${message}` : message;
+      res.status(400).json({ error: errorMsg });
+      return;
+    }
 
-    if (!firstName || typeof firstName !== 'string' || firstName.trim() === '') {
-      res.status(400).json({ error: 'firstName is required' });
-      return;
-    }
-    if (!lastName || typeof lastName !== 'string' || lastName.trim() === '') {
-      res.status(400).json({ error: 'lastName is required' });
-      return;
-    }
-    if (!email || typeof email !== 'string' || email.trim() === '') {
-      res.status(400).json({ error: 'email is required' });
-      return;
-    }
+    const { firstName, lastName, email, phone, address, education, workExperience } = parsed.data;
 
     const dto: CreateCandidateDto = {
-      firstName: (firstName as string).trim(),
-      lastName: (lastName as string).trim(),
-      email: (email as string).trim(),
-      phone: typeof phone === 'string' ? phone.trim() : undefined,
-      address: typeof address === 'string' ? address.trim() : undefined,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.trim(),
+      phone: phone?.trim(),
+      address: address?.trim(),
       education: education !== undefined ? parseJsonField(education) : undefined,
       workExperience: workExperience !== undefined ? parseJsonField(workExperience) : undefined,
     };
@@ -117,6 +126,26 @@ export async function getCandidateById(req: Request, res: Response): Promise<voi
       res.status(404).json({ error: err.message });
     } else {
       console.error('Error fetching candidate:', err);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+}
+
+export async function deleteCandidate(req: Request, res: Response): Promise<void> {
+  try {
+    const id = parseInt(req.params['id'], 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid candidate id' });
+      return;
+    }
+
+    await candidateService.delete(id);
+    res.status(204).send();
+  } catch (err: unknown) {
+    if (err instanceof NotFoundError || (err instanceof Error && err.name === 'NotFoundError')) {
+      res.status(404).json({ error: err.message });
+    } else {
+      console.error('Error deleting candidate:', err);
       res.status(500).json({ error: 'Internal server error' });
     }
   }
