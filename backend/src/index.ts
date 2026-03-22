@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import candidateRoutes from './routes/candidate.routes';
 
@@ -9,6 +10,7 @@ export const app = express();
 
 const port = 3010;
 
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,6 +30,8 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).send('Something broke!');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Server is running at http://localhost:${port}`);
+  });
+}

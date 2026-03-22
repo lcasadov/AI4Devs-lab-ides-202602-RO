@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose up:*)",
+      "Bash(docker compose:*)",
+      "Bash(npm install:*)",
+      "Bash(psql --version)",
+      "Bash(pg_isready)",
+      "Bash(wmic cpu:*)",
+      "Bash(openspec new:*)",
+      "Bash(openspec status:*)",
+      "Bash(openspec instructions:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx tsc:*)",
+
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)",
+      "Bash(npx ts-node -e \":*)",
+      "Bash(npx ts-jest/bin/ts-jest.js config:show)",
+      "Bash(node:*)"
+    ]
+  }
+}

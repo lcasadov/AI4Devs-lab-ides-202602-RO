@@ -81,7 +81,7 @@ export async function createCandidate(req: Request, res: Response): Promise<void
     const candidate = await candidateService.create(dto, cvFileName);
     res.status(201).json(candidate);
   } catch (err: unknown) {
-    if (err instanceof DuplicateEmailError) {
+    if (err instanceof Error && err.name === 'DuplicateEmailError') {
       res.status(409).json({ error: err.message });
     } else if (err instanceof Error && err.message === 'Only PDF and DOCX files are allowed') {
       res.status(400).json({ error: err.message });
@@ -113,7 +113,7 @@ export async function getCandidateById(req: Request, res: Response): Promise<voi
     const candidate = await candidateService.getById(id);
     res.status(200).json(candidate);
   } catch (err: unknown) {
-    if (err instanceof NotFoundError) {
+    if (err instanceof Error && err.name === 'NotFoundError') {
       res.status(404).json({ error: err.message });
     } else {
       console.error('Error fetching candidate:', err);
