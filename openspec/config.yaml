@@ -1,0 +1,32 @@
+schema: spec-driven
+
+context: |
+  Project: LTI - Talent Tracking System (ATS)
+  Domain: Human Resources / Applicant Tracking System
+
+  Tech stack:
+  - Frontend: React 18, TypeScript, Create React App (port 3000)
+  - Backend: Node.js, Express 4, TypeScript (port 3010)
+  - ORM: Prisma 5 with PostgreSQL
+  - Database: PostgreSQL running in Docker (port 5432, DB: LTIdb)
+  - Testing: Jest, Supertest
+  - API Docs: Swagger (swagger-jsdoc + swagger-ui-express)
+
+  Project structure:
+  - frontend/src/ — React components and pages
+  - backend/src/ — Express routes and controllers
+  - backend/prisma/ — Prisma schema and migrations
+  - docker-compose.yml — PostgreSQL container
+
+  Conventions:
+  - Backend runs with ts-node-dev in dev mode
+  - Environment variables in backend/.env
+  - Prisma migrations with: npx prisma migrate dev
+
+rules:
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Each task should be independently testable
+  proposal:
+    - Always include affected files (frontend and/or backend)
+    - Specify if DB schema changes are needed (Prisma migration required)
