@@ -6,7 +6,9 @@ import { Sidebar } from './components/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AddCandidatePage } from './pages/AddCandidatePage';
 import { DashboardPage } from './pages/DashboardPage';
+import { JobTypesPage } from './pages/JobTypesPage';
 import { LoginPage } from './pages/LoginPage';
+import { SectorsPage } from './pages/SectorsPage';
 import { UsersPage } from './pages/UsersPage';
 
 function AppLayout(): JSX.Element {
@@ -44,6 +46,22 @@ function AppLayout(): JSX.Element {
               element={
                 <ProtectedRoute requireAdmin>
                   <UsersPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sectors"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <SectorsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobtypes"
+              element={
+                <ProtectedRoute requireAdmin>
+                  <JobTypesPage />
                 </ProtectedRoute>
               }
             />

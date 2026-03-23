@@ -12,6 +12,8 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', path: '/dashboard' },
   { label: 'Candidatos', path: '/candidates' },
   { label: 'Usuarios', path: '/users', adminOnly: true },
+  { label: 'Sectores', path: '/sectors', adminOnly: true },
+  { label: 'Tipos de puesto', path: '/jobtypes', adminOnly: true },
 ];
 
 export function Sidebar(): JSX.Element {
