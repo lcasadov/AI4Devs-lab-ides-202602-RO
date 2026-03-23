@@ -1,6 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { AddCandidatePage } from '../pages/AddCandidatePage';
+
+// ── Mock react-router-dom ─────────────────────────────────────────────────────
+jest.mock('react-router-dom', () => ({
+  useNavigate: () => jest.fn(),
+}));
 
 // ── Mock CandidateForm ───────────────────────────────────────────────────────
 // Capture the onSuccess callback so tests can trigger it
@@ -28,7 +33,7 @@ describe('AddCandidatePage', () => {
 
   it('renders the CandidateForm component', () => {
     // Arrange & Act
-    render(<AddCandidatePage onBack={jest.fn()} />);
+    render(<AddCandidatePage />);
 
     // Assert
     expect(screen.getByTestId('candidate-form')).toBeInTheDocument();
@@ -36,7 +41,7 @@ describe('AddCandidatePage', () => {
 
   it('shows "Candidato añadido correctamente" after a successful submission', async () => {
     // Arrange
-    render(<AddCandidatePage onBack={jest.fn()} />);
+    render(<AddCandidatePage />);
 
     // Act – trigger the success callback that was passed to CandidateForm
     fireEvent.click(screen.getByText('Simulate Success'));
