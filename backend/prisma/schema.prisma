@@ -31,6 +31,25 @@ model User {
   updatedAt    DateTime @updatedAt
 }
 
+model Sector {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(100)
+  jobTypes  JobType[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model JobType {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  sectorId  Int
+  sector    Sector   @relation(fields: [sectorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([name, sectorId])
+}
+
 model Candidate {
   id               Int      @id @default(autoincrement())
   firstName        String
