@@ -62,7 +62,7 @@ export async function getById(req: Request, res: Response): Promise<void> {
     const user = await userService.findById(id);
     res.status(200).json(user);
   } catch (err: unknown) {
-    if (err instanceof UserNotFoundError) {
+    if (err instanceof Error && err.name === 'UserNotFoundError') {
       res.status(404).json({ error: err.message });
       return;
     }
@@ -83,7 +83,7 @@ export async function create(req: Request, res: Response): Promise<void> {
     const user = await userService.create(parsed.data);
     res.status(201).json(user);
   } catch (err: unknown) {
-    if (err instanceof DuplicateLoginError || err instanceof DuplicateEmailError) {
+    if (err instanceof Error && (err.name === 'DuplicateLoginError' || err.name === 'DuplicateEmailError')) {
       res.status(409).json({ error: err.message });
       return;
     }
@@ -110,11 +110,11 @@ export async function update(req: Request, res: Response): Promise<void> {
     const user = await userService.update(id, parsed.data);
     res.status(200).json(user);
   } catch (err: unknown) {
-    if (err instanceof UserNotFoundError) {
+    if (err instanceof Error && err.name === 'UserNotFoundError') {
       res.status(404).json({ error: err.message });
       return;
     }
-    if (err instanceof DuplicateLoginError || err instanceof DuplicateEmailError) {
+    if (err instanceof Error && (err.name === 'DuplicateLoginError' || err.name === 'DuplicateEmailError')) {
       res.status(409).json({ error: err.message });
       return;
     }
@@ -140,11 +140,11 @@ export async function deleteUser(req: Request, res: Response): Promise<void> {
     await userService.delete(id, req.user.userId);
     res.status(204).send();
   } catch (err: unknown) {
-    if (err instanceof CannotDeleteSelfError) {
+    if (err instanceof Error && err.name === 'CannotDeleteSelfError') {
       res.status(400).json({ error: err.message });
       return;
     }
-    if (err instanceof UserNotFoundError) {
+    if (err instanceof Error && err.name === 'UserNotFoundError') {
       res.status(404).json({ error: err.message });
       return;
     }
@@ -165,7 +165,7 @@ export async function resetPassword(req: Request, res: Response): Promise<void> 
     await userService.resetPassword(id);
     res.status(200).json({ message: 'Password reset successfully. New credentials have been sent by email.' });
   } catch (err: unknown) {
-    if (err instanceof UserNotFoundError) {
+    if (err instanceof Error && err.name === 'UserNotFoundError') {
       res.status(404).json({ error: err.message });
       return;
     }

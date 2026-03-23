@@ -35,7 +35,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     const result = await authService.login(parsed.data.login, parsed.data.password);
     res.status(200).json(result);
   } catch (err: unknown) {
-    if (err instanceof InvalidCredentialsError) {
+    if (err instanceof Error && err.name === 'InvalidCredentialsError') {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }
@@ -84,15 +84,15 @@ export async function changePassword(req: Request, res: Response): Promise<void>
     );
     res.status(200).json({ message: 'Password changed successfully' });
   } catch (err: unknown) {
-    if (err instanceof InvalidPasswordError) {
+    if (err instanceof Error && err.name === 'InvalidPasswordError') {
       res.status(400).json({ error: err.message });
       return;
     }
-    if (err instanceof InvalidCurrentPasswordError) {
+    if (err instanceof Error && err.name === 'InvalidCurrentPasswordError') {
       res.status(400).json({ error: err.message });
       return;
     }
-    if (err instanceof InvalidCredentialsError) {
+    if (err instanceof Error && err.name === 'InvalidCredentialsError') {
       res.status(401).json({ error: 'Invalid credentials' });
       return;
     }

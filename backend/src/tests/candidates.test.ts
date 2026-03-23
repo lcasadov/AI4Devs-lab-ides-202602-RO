@@ -1,4 +1,5 @@
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
 
 // ── Mock Prisma BEFORE importing the app ─────────────────────────────────────
 const mockPrismaCandidate = {
@@ -10,6 +11,13 @@ const mockPrismaCandidate = {
 jest.mock('../infrastructure/database/prisma-client', () => ({
   getPrismaClient: jest.fn(() => ({
     candidate: mockPrismaCandidate,
+    user: {
+      findUnique: jest.fn(),
+      findMany: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
   })),
 }));
 
@@ -17,6 +25,8 @@ jest.mock('../infrastructure/database/prisma-client', () => ({
 beforeAll(() => {
   jest.spyOn(console, 'log').mockImplementation(() => undefined);
   jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  // Set JWT_SECRET so authMiddleware can verify tokens
+  process.env['JWT_SECRET'] = 'test-secret-for-tests';
 });
 
 afterAll(() => {
@@ -24,6 +34,12 @@ afterAll(() => {
 });
 
 import { app } from '../index';
+
+// ── Auth helper — candidates route requires JWT since OWASP hardening ─────────
+const TEST_JWT_SECRET = 'test-secret-for-tests';
+function recruiterToken(): string {
+  return jwt.sign({ userId: 99, login: 'tester', role: 'RECRUITER' }, TEST_JWT_SECRET, { expiresIn: '1h' });
+}
 
 // ── Shared test data ──────────────────────────────────────────────────────────
 const validCandidate = {
@@ -52,6 +68,7 @@ describe('POST /candidates', () => {
     // Act
     const res = await request(app)
       .post('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
       .field('firstName', 'Jane')
       .field('lastName', 'Doe')
       .field('email', 'jane.doe@example.com');
@@ -67,6 +84,7 @@ describe('POST /candidates', () => {
     // Act
     const res = await request(app)
       .post('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
       .field('lastName', 'Doe')
       .field('email', 'jane.doe@example.com');
 
@@ -82,6 +100,7 @@ describe('POST /candidates', () => {
     // Act
     const res = await request(app)
       .post('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
       .field('firstName', 'Jane')
       .field('email', 'jane.doe@example.com');
 
@@ -97,6 +116,7 @@ describe('POST /candidates', () => {
     // Act
     const res = await request(app)
       .post('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
       .field('firstName', 'Jane')
       .field('lastName', 'Doe');
 
@@ -113,6 +133,7 @@ describe('POST /candidates', () => {
     // Act
     const res = await request(app)
       .post('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
       .field('firstName', 'Jane')
       .field('lastName', 'Doe')
       .field('email', 'jane.doe@example.com');
@@ -132,6 +153,7 @@ describe('POST /candidates', () => {
     // Act
     const res = await request(app)
       .post('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
       .field('firstName', 'Jane')
       .field('lastName', 'Doe')
       .field('email', 'jane.doe@example.com');
@@ -154,7 +176,9 @@ describe('GET /candidates', () => {
     mockPrismaCandidate.findMany.mockResolvedValue([validCandidate]);
 
     // Act
-    const res = await request(app).get('/candidates');
+    const res = await request(app)
+      .get('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
 
     // Assert
     expect(res.status).toBe(200);
@@ -168,7 +192,9 @@ describe('GET /candidates', () => {
     mockPrismaCandidate.findMany.mockResolvedValue([]);
 
     // Act
-    const res = await request(app).get('/candidates');
+    const res = await request(app)
+      .get('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
 
     // Assert
     expect(res.status).toBe(200);
@@ -180,7 +206,9 @@ describe('GET /candidates', () => {
     mockPrismaCandidate.findMany.mockRejectedValue(new Error('DB connection lost'));
 
     // Act
-    const res = await request(app).get('/candidates');
+    const res = await request(app)
+      .get('/candidates')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
 
     // Assert
     expect(res.status).toBe(500);
@@ -199,7 +227,9 @@ describe('GET /candidates/:id', () => {
     mockPrismaCandidate.findUnique.mockResolvedValue(validCandidate);
 
     // Act
-    const res = await request(app).get('/candidates/1');
+    const res = await request(app)
+      .get('/candidates/1')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
 
     // Assert
     expect(res.status).toBe(200);
@@ -211,7 +241,9 @@ describe('GET /candidates/:id', () => {
     mockPrismaCandidate.findUnique.mockResolvedValue(null);
 
     // Act
-    const res = await request(app).get('/candidates/999');
+    const res = await request(app)
+      .get('/candidates/999')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
 
     // Assert
     expect(res.status).toBe(404);
@@ -224,7 +256,9 @@ describe('GET /candidates/:id', () => {
     mockPrismaCandidate.findUnique.mockRejectedValue(new Error('DB timeout'));
 
     // Act
-    const res = await request(app).get('/candidates/1');
+    const res = await request(app)
+      .get('/candidates/1')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
 
     // Assert
     expect(res.status).toBe(500);
