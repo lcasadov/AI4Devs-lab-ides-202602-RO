@@ -9,6 +9,8 @@ import swaggerUi from 'swagger-ui-express';
 import candidateRoutes from './routes/candidate.routes';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
+import sectorRoutes from './routes/sector.routes';
+import jobtypeRoutes from './routes/jobtype.routes';
 import { authMiddleware } from './middleware/auth.middleware';
 
 dotenv.config();
@@ -68,6 +70,12 @@ app.use('/auth', authRoutes);
 
 // User management routes (auth + role enforced per-route)
 app.use('/users', userRoutes);
+
+// Sector routes — auth required; mutations ADMIN only (enforced per-route)
+app.use('/sectors', authMiddleware, sectorRoutes);
+
+// JobType routes — auth required; mutations ADMIN only (enforced per-route)
+app.use('/jobtypes', authMiddleware, jobtypeRoutes);
 
 // Candidates routes — protected by JWT
 app.use('/candidates', authMiddleware, candidateRoutes);
