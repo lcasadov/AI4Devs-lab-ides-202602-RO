@@ -1,39 +1,46 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CandidateForm } from '../components/CandidateForm';
 
-interface AddCandidatePageProps {
-  onBack: () => void;
-}
-
-export function AddCandidatePage({ onBack }: AddCandidatePageProps) {
+export function AddCandidatePage(): JSX.Element {
   const [isSuccess, setIsSuccess] = useState(false);
   const [formKey, setFormKey] = useState(0);
+  const navigate = useNavigate();
 
-  function handleSuccess() {
+  function handleSuccess(): void {
     setIsSuccess(true);
   }
 
-  function handleAddAnother() {
+  function handleAddAnother(): void {
     setIsSuccess(false);
     setFormKey((prev) => prev + 1);
   }
 
   return (
-    <div style={styles.page}>
-      <div style={styles.header}>
-        <button onClick={onBack} style={styles.backButton}>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="flex items-center gap-4 mb-8">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="px-4 py-2 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+        >
           ← Volver
         </button>
-        <h1 style={styles.title}>Añadir candidato</h1>
+        <h1 className="text-2xl font-bold text-gray-900 m-0">Añadir candidato</h1>
       </div>
 
-      <div style={styles.content}>
+      <div className="max-w-2xl">
         {isSuccess ? (
-          <div style={styles.successContainer}>
-            <div style={styles.successBanner} role="status">
-              ✓ Candidato añadido correctamente
+          <div className="flex flex-col gap-5 items-start">
+            <div
+              className="px-5 py-4 bg-green-100 border border-green-300 rounded-lg text-green-800 text-base font-semibold"
+              role="status"
+            >
+              Candidato añadido correctamente
             </div>
-            <button onClick={handleAddAnother} style={styles.addAnotherButton}>
+            <button
+              onClick={handleAddAnother}
+              className="px-5 py-2.5 bg-blue-600 text-white border-none rounded-md text-base font-semibold cursor-pointer hover:bg-blue-700"
+            >
               Añadir otro candidato
             </button>
           </div>
@@ -44,60 +51,3 @@ export function AddCandidatePage({ onBack }: AddCandidatePageProps) {
     </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  page: {
-    minHeight: '100vh',
-    backgroundColor: '#f9fafb',
-    padding: '24px',
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    marginBottom: '32px',
-  },
-  backButton: {
-    padding: '8px 16px',
-    backgroundColor: 'transparent',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    fontSize: '14px',
-    cursor: 'pointer',
-    color: '#374151',
-  },
-  title: {
-    margin: 0,
-    fontSize: '24px',
-    fontWeight: 700,
-    color: '#111827',
-  },
-  content: {
-    maxWidth: '600px',
-  },
-  successContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    alignItems: 'flex-start',
-  },
-  successBanner: {
-    padding: '16px 20px',
-    backgroundColor: '#d1fae5',
-    border: '1px solid #6ee7b7',
-    borderRadius: '8px',
-    color: '#065f46',
-    fontSize: '16px',
-    fontWeight: 600,
-  },
-  addAnotherButton: {
-    padding: '10px 20px',
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '16px',
-    fontWeight: 600,
-    cursor: 'pointer',
-  },
-};
