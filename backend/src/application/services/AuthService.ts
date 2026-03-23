@@ -7,7 +7,7 @@ import {
   hashPassword,
   generatePassword,
   validatePassword,
-} from '../../infrastructure/utils/passwordUtils';
+} from '../../domain/utils/passwordUtils';
 
 export class InvalidCredentialsError extends Error {
   constructor() {

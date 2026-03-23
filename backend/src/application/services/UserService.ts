@@ -4,7 +4,7 @@ import { User, CreateUserDto, UpdateUserDto } from '../../domain/models/User';
 import {
   generatePassword,
   hashPassword,
-} from '../../infrastructure/utils/passwordUtils';
+} from '../../domain/utils/passwordUtils';
 
 export class UserNotFoundError extends Error {
   constructor(id: number) {
