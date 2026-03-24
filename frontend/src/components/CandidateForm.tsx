@@ -86,6 +86,17 @@ export function CandidateForm({ candidate, onSuccess, onCancel }: CandidateFormP
   const [cvUploading, setCvUploading] = useState(false);
   const [cvSuccess, setCvSuccess] = useState(false);
 
+  // Escape key to close form
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
+
   // Load sectors on mount
   useEffect(() => {
     sectorService.getAll().then(setSectors).catch(() => undefined);

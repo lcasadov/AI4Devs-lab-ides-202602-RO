@@ -118,6 +118,7 @@ export function JobTypesPage(): JSX.Element {
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-sm">
+          <caption className="sr-only">Tabla de tipos de puesto</caption>
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-gray-700">
@@ -126,6 +127,7 @@ export function JobTypesPage(): JSX.Element {
                   <input
                     type="text"
                     placeholder="Filtrar..."
+                    aria-label="Filtrar por nombre"
                     value={filters.name ?? ''}
                     onChange={(e) => handleFilterChange('name', e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -137,6 +139,7 @@ export function JobTypesPage(): JSX.Element {
                   <span>Sector</span>
                   <select
                     value={filters.sectorId ?? ''}
+                    aria-label="Filtrar por sector"
                     onChange={(e) => handleFilterChange('sectorId', e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
@@ -153,7 +156,7 @@ export function JobTypesPage(): JSX.Element {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">Cargando...</td>
+                <td colSpan={3} className="px-4 py-8 text-center text-gray-500"><span role="status">Cargando...</span></td>
               </tr>
             ) : jobTypes.length === 0 ? (
               <tr>
