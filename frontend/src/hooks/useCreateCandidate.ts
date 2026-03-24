@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { candidateService } from '../services/candidate.service';
-import { CreateCandidateDto } from '../types/candidate';
+import { CreateCandidateFormData } from '../types/candidate';
 
 interface UseCreateCandidateResult {
   isLoading: boolean;
   error: string | null;
   success: boolean;
-  createCandidate: (dto: CreateCandidateDto) => Promise<void>;
+  createCandidate: (dto: CreateCandidateFormData) => Promise<void>;
 }
 
 export function useCreateCandidate(): UseCreateCandidateResult {
@@ -14,7 +14,7 @@ export function useCreateCandidate(): UseCreateCandidateResult {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  async function createCandidate(dto: CreateCandidateDto): Promise<void> {
+  async function createCandidate(dto: CreateCandidateFormData): Promise<void> {
     setError(null);
     setSuccess(false);
     setIsLoading(true);

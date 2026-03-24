@@ -3,37 +3,50 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CandidateForm } from '../components/CandidateForm';
 
-// ── Mock useCreateCandidate ──────────────────────────────────────────────────
-const mockCreateCandidate = jest.fn();
-
-let mockIsLoading = false;
-let mockError: string | null = null;
-let mockSuccess = false;
-
-jest.mock('../hooks/useCreateCandidate', () => ({
-  useCreateCandidate: () => ({
-    isLoading: mockIsLoading,
-    error: mockError,
-    success: mockSuccess,
-    createCandidate: mockCreateCandidate,
-  }),
+// ── Mock useAuth ─────────────────────────────────────────────────────────────
+jest.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ token: 'test-token' }),
 }));
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function renderForm(onSuccess = jest.fn()) {
-  return render(<CandidateForm onSuccess={onSuccess} />);
+// ── Mock sectorService ───────────────────────────────────────────────────────
+jest.mock('../services/sector.service', () => ({
+  sectorService: {
+    getAll: jest.fn().mockResolvedValue([]),
+  },
+}));
+
+// ── Mock jobtypeService ──────────────────────────────────────────────────────
+jest.mock('../services/jobtype.service', () => ({
+  jobtypeService: {
+    getAll: jest.fn().mockResolvedValue([]),
+  },
+}));
+
+// ── Mock candidateService ────────────────────────────────────────────────────
+const mockCreate = jest.fn();
+const mockUpdate = jest.fn();
+const mockUploadCv = jest.fn();
+
+jest.mock('../services/candidate.service', () => ({
+  candidateService: {
+    create: (...args: unknown[]) => mockCreate(...args),
+    update: (...args: unknown[]) => mockUpdate(...args),
+    uploadCv: (...args: unknown[]) => mockUploadCv(...args),
+  },
+}));
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function renderForm(onSuccess = jest.fn(), onCancel = jest.fn()) {
+  return render(<CandidateForm onSuccess={onSuccess} onCancel={onCancel} />);
 }
 
-// ── Tests ────────────────────────────────────────────────────────────────────
+// ── Tests ─────────────────────────────────────────────────────────────────────
 describe('CandidateForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockIsLoading = false;
-    mockError = null;
-    mockSuccess = false;
   });
 
-  it('renders all form fields', () => {
+  it('renders basic required fields', () => {
     // Arrange & Act
     renderForm();
 
@@ -43,19 +56,23 @@ describe('CandidateForm', () => {
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/teléfono/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/dirección/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/educación/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/experiencia laboral/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/cv/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /añadir candidato/i })).toBeInTheDocument();
+  });
+
+  it('renders Guardar and Cancelar buttons', () => {
+    // Arrange & Act
+    renderForm();
+
+    // Assert
+    expect(screen.getByRole('button', { name: /guardar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
   });
 
   it('shows "El nombre es requerido" when firstName is empty on submit', async () => {
     // Arrange
     renderForm();
-    const form = screen.getByRole('button', { name: /añadir candidato/i }).closest('form')!;
 
-    // Act – submit without filling firstName
-    fireEvent.submit(form);
+    // Act – submit without filling fields
+    fireEvent.submit(screen.getByRole('button', { name: /guardar/i }).closest('form')!);
 
     // Assert
     expect(await screen.findByText('El nombre es requerido')).toBeInTheDocument();
@@ -69,43 +86,85 @@ describe('CandidateForm', () => {
     await userEvent.type(screen.getByLabelText(/email/i), 'not-an-email');
 
     // Act
-    fireEvent.submit(screen.getByRole('button', { name: /añadir candidato/i }).closest('form')!);
+    fireEvent.submit(screen.getByRole('button', { name: /guardar/i }).closest('form')!);
 
     // Assert
     expect(await screen.findByText('El formato del email no es válido')).toBeInTheDocument();
   });
 
-  it('disables the submit button while isLoading is true', () => {
+  it('shows phone format error when phone is invalid', async () => {
     // Arrange
-    mockIsLoading = true;
+    renderForm();
+    await userEvent.type(screen.getByLabelText(/nombre/i), 'Jane');
+    await userEvent.type(screen.getByLabelText(/apellido/i), 'Doe');
+    await userEvent.type(screen.getByLabelText(/email/i), 'jane@example.com');
+    await userEvent.type(screen.getByLabelText(/teléfono/i), '123456789');
 
     // Act
-    renderForm();
+    fireEvent.submit(screen.getByRole('button', { name: /guardar/i }).closest('form')!);
 
     // Assert
-    expect(screen.getByRole('button', { name: /guardando/i })).toBeDisabled();
+    expect(await screen.findByText(/\+34XXXXXXXXX/)).toBeInTheDocument();
   });
 
-  it('calls onSuccess when success changes to true', async () => {
+  it('calls candidateService.create and onSuccess on valid submission', async () => {
     // Arrange
+    mockCreate.mockResolvedValue({
+      id: 1,
+      firstName: 'Jane',
+      lastName: 'Doe',
+      email: 'jane@example.com',
+      createdAt: '2024-01-01T00:00:00.000Z',
+      updatedAt: '2024-01-01T00:00:00.000Z',
+    });
     const onSuccess = jest.fn();
-    mockSuccess = true;
+    render(<CandidateForm onSuccess={onSuccess} onCancel={jest.fn()} />);
+
+    await userEvent.type(screen.getByLabelText(/nombre/i), 'Jane');
+    await userEvent.type(screen.getByLabelText(/apellido/i), 'Doe');
+    await userEvent.type(screen.getByLabelText(/email/i), 'jane@example.com');
 
     // Act
-    render(<CandidateForm onSuccess={onSuccess} />);
+    fireEvent.submit(screen.getByRole('button', { name: /guardar/i }).closest('form')!);
 
-    // Assert – useEffect fires synchronously in the render cycle
+    // Assert
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
   });
 
-  it('shows a general error alert when error is not null', () => {
+  it('shows a general error alert when candidateService.create rejects', async () => {
     // Arrange
-    mockError = 'Este email ya está registrado';
-
-    // Act
+    mockCreate.mockRejectedValue(new Error('Este email ya está registrado'));
     renderForm();
 
+    await userEvent.type(screen.getByLabelText(/nombre/i), 'Jane');
+    await userEvent.type(screen.getByLabelText(/apellido/i), 'Doe');
+    await userEvent.type(screen.getByLabelText(/email/i), 'jane@example.com');
+
+    // Act
+    fireEvent.submit(screen.getByRole('button', { name: /guardar/i }).closest('form')!);
+
     // Assert
-    expect(screen.getByRole('alert')).toHaveTextContent('Este email ya está registrado');
+    expect(await screen.findByRole('alert')).toHaveTextContent('Este email ya está registrado');
+  });
+
+  it('calls onCancel when Cancelar button is clicked', () => {
+    // Arrange
+    const onCancel = jest.fn();
+    render(<CandidateForm onSuccess={jest.fn()} onCancel={onCancel} />);
+
+    // Act
+    fireEvent.click(screen.getByRole('button', { name: /cancelar/i }));
+
+    // Assert
+    expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not show CV upload section in create mode', () => {
+    // Arrange & Act
+    renderForm();
+
+    // Assert – no CV section in create mode
+    expect(screen.queryByText(/subir cv/i)).not.toBeInTheDocument();
   });
 });
