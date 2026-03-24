@@ -26,6 +26,16 @@ export function JobTypeForm({ jobType, onSave, onCancel, onCreate, onUpdate }: J
     });
   }, []);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
+
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
     if (!name.trim()) {

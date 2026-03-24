@@ -177,6 +177,7 @@ export function CandidatesPage(): JSX.Element {
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-sm">
+          <caption className="sr-only">Tabla de candidatos</caption>
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-gray-700">
@@ -185,6 +186,7 @@ export function CandidatesPage(): JSX.Element {
                   <input
                     type="text"
                     placeholder="Filtrar..."
+                    aria-label="Filtrar por nombre"
                     value={filterFirstName}
                     onChange={(e) => setFilterFirstName(e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -197,6 +199,7 @@ export function CandidatesPage(): JSX.Element {
                   <input
                     type="text"
                     placeholder="Filtrar..."
+                    aria-label="Filtrar por apellido"
                     value={filterLastName}
                     onChange={(e) => setFilterLastName(e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -210,6 +213,7 @@ export function CandidatesPage(): JSX.Element {
                   <span>Sector</span>
                   <select
                     value={filterSectorId}
+                    aria-label="Filtrar por sector"
                     onChange={(e) => handleFilterSectorChange(e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
                   >
@@ -227,6 +231,7 @@ export function CandidatesPage(): JSX.Element {
                   <span>Tipo de puesto</span>
                   <select
                     value={filterJobTypeId}
+                    aria-label="Filtrar por tipo de puesto"
                     onChange={(e) => handleFilterJobTypeChange(e.target.value)}
                     disabled={filterSectorId === ''}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100"
@@ -247,7 +252,7 @@ export function CandidatesPage(): JSX.Element {
             {isLoading ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                  Cargando...
+                  <span role="status">Cargando...</span>
                 </td>
               </tr>
             ) : filteredCandidates.length === 0 ? (

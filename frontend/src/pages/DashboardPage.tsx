@@ -9,7 +9,7 @@ interface StatsPanelProps {
 
 function StatsPanel({ title, entries }: StatsPanelProps): JSX.Element {
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div className="bg-white rounded-lg shadow p-4" aria-label={title}>
       <h2 className="text-lg font-semibold text-gray-800 mb-3">{title}</h2>
       <table className="w-full text-sm">
         <thead>
@@ -65,7 +65,7 @@ export function DashboardPage(): JSX.Element {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
 
       {loading && (
-        <p className="text-gray-500">Cargando...</p>
+        <p className="text-gray-500" role="status">Cargando...</p>
       )}
 
       {error && !loading && (

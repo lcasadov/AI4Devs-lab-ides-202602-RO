@@ -107,6 +107,7 @@ export function SectorsPage(): JSX.Element {
 
       <div className="bg-white rounded-xl shadow overflow-hidden">
         <table className="w-full text-sm">
+          <caption className="sr-only">Tabla de sectores</caption>
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-4 py-3 text-left font-semibold text-gray-700">
@@ -115,6 +116,7 @@ export function SectorsPage(): JSX.Element {
                   <input
                     type="text"
                     placeholder="Filtrar..."
+                    aria-label="Filtrar por nombre"
                     value={nameFilter}
                     onChange={(e) => handleFilterChange(e.target.value)}
                     className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -127,7 +129,7 @@ export function SectorsPage(): JSX.Element {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={2} className="px-4 py-8 text-center text-gray-500">Cargando...</td>
+                <td colSpan={2} className="px-4 py-8 text-center text-gray-500"><span role="status">Cargando...</span></td>
               </tr>
             ) : filteredSectors.length === 0 ? (
               <tr>
