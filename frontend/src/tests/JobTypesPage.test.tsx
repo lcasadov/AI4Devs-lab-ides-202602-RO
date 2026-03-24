@@ -82,9 +82,8 @@ describe('JobTypesPage', () => {
   it('renders sector filter combo', () => {
     // Arrange & Act
     render(<JobTypesPage />);
-    // Assert — the "Todos" option should be present in the sector filter
-    const todosOptions = screen.getAllByText('Todos');
-    expect(todosOptions.length).toBeGreaterThanOrEqual(1);
+    // Assert — sector filter combo is present via aria-label
+    expect(screen.getByLabelText(/filtrar por sector/i)).toBeInTheDocument();
   });
 
   it('filters by sector when selecting from the combo', async () => {

@@ -10,6 +10,26 @@ interface UserFormProps {
   onResetPassword: (id: number) => Promise<void>;
 }
 
+const ff = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+
+const inputBase: React.CSSProperties = {
+  width: '100%', boxSizing: 'border-box',
+  border: '1.5px solid #e2e8f0', borderRadius: '10px',
+  padding: '11px 14px', fontSize: '14px', color: '#1e293b',
+  background: '#fff', outline: 'none',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+  transition: 'border-color 0.15s, box-shadow 0.15s',
+};
+
+function focusIn(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>): void {
+  e.target.style.borderColor = '#3b82f6';
+  e.target.style.boxShadow = '0 0 0 3px rgba(59,130,246,0.12)';
+}
+function focusOut(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>): void {
+  e.target.style.borderColor = '#e2e8f0';
+  e.target.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+}
+
 export function UserForm({
   user,
   onSave,
@@ -55,7 +75,6 @@ export function UserForm({
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (isEdit && user) {
         const dto: UpdateUserRequest = { login, firstName, lastName, email, role, active };
@@ -66,8 +85,7 @@ export function UserForm({
       }
       onSave();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al guardar el usuario';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Error al guardar el usuario');
     } finally {
       setLoading(false);
     }
@@ -85,134 +103,183 @@ export function UserForm({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-lg">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">
-        {isEdit ? 'Editar usuario' : 'Nuevo usuario'}
-      </h2>
+    <div style={{ fontFamily: ff }}>
+      {/* Header */}
+      <div style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginBottom: '4px', letterSpacing: '-0.3px' }}>
+          {isEdit ? 'Editar usuario' : 'Nuevo usuario'}
+        </h2>
+        <p style={{ fontSize: '13px', color: '#64748b' }}>
+          {isEdit ? 'Modifica los datos del usuario.' : 'Completa los datos del nuevo usuario. Se enviará la contraseña por email.'}
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700" htmlFor="userLogin">
-            Usuario *
-          </label>
-          <input
-            id="userLogin"
-            type="text"
-            value={login}
-            onChange={(e) => setLogin(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+      <form onSubmit={(e) => { void handleSubmit(e); }} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+        {/* Grid: login + nombre */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="userLogin" style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              Usuario <span style={{ color: '#ef4444' }}>*</span>
+            </label>
+            <input
+              id="userLogin"
+              type="text"
+              value={login}
+              onChange={(e) => setLogin(e.target.value)}
+              required
+              style={inputBase}
+              onFocus={focusIn}
+              onBlur={focusOut}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="userRole" style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              Rol <span style={{ color: '#ef4444' }}>*</span>
+            </label>
+            <select
+              id="userRole"
+              value={role}
+              onChange={(e) => setRole(e.target.value as 'ADMIN' | 'RECRUITER')}
+              required
+              style={{ ...inputBase, cursor: 'pointer' }}
+              onFocus={focusIn}
+              onBlur={focusOut}
+            >
+              <option value="RECRUITER">Recruiter</option>
+              <option value="ADMIN">Admin</option>
+            </select>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700" htmlFor="firstName">
-            Nombre *
-          </label>
-          <input
-            id="firstName"
-            type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
+        {/* Grid: nombre + apellidos */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="firstName" style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              Nombre <span style={{ color: '#ef4444' }}>*</span>
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              style={inputBase}
+              onFocus={focusIn}
+              onBlur={focusOut}
+            />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label htmlFor="lastName" style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+              Apellidos <span style={{ color: '#ef4444' }}>*</span>
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              style={inputBase}
+              onFocus={focusIn}
+              onBlur={focusOut}
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700" htmlFor="lastName">
-            Apellidos *
-          </label>
-          <input
-            id="lastName"
-            type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700" htmlFor="userEmail">
-            Email *
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label htmlFor="userEmail" style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+            Email <span style={{ color: '#ef4444' }}>*</span>
           </label>
           <input
             id="userEmail"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            style={inputBase}
+            onFocus={focusIn}
+            onBlur={focusOut}
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-gray-700" htmlFor="userRole">
-            Rol *
-          </label>
-          <select
-            id="userRole"
-            value={role}
-            onChange={(e) => setRole(e.target.value as 'ADMIN' | 'RECRUITER')}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="RECRUITER">Recruiter</option>
-            <option value="ADMIN">Admin</option>
-          </select>
-        </div>
-
         {isEdit && (
-          <div className="flex items-center gap-2">
+          <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
             <input
               id="userActive"
               type="checkbox"
               checked={active}
               onChange={(e) => setActive(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              style={{ width: '16px', height: '16px', accentColor: '#2563eb', cursor: 'pointer' }}
             />
-            <label className="text-sm font-medium text-gray-700" htmlFor="userActive">
-              Usuario activo
-            </label>
-          </div>
+            <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Usuario activo</span>
+          </label>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700" role="alert">
+          <div role="alert" style={{
+            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px',
+            padding: '12px 14px', fontSize: '13px', color: '#dc2626',
+            display: 'flex', gap: '8px', alignItems: 'flex-start',
+          }}>
+            <span style={{ fontSize: '15px', lineHeight: 1.2 }}>⚠️</span>
             {error}
           </div>
         )}
 
+        {/* Reset password section */}
         {isEdit && (
-          <div className="border-t border-gray-200 pt-4">
+          <div style={{
+            borderTop: '1px solid #f1f5f9', paddingTop: '16px',
+            display: 'flex', flexDirection: 'column', gap: '8px',
+          }}>
             <button
               type="button"
               onClick={() => { void handleResetPassword(); }}
-              className="text-sm text-orange-600 hover:text-orange-800 underline"
+              style={{
+                alignSelf: 'flex-start', background: 'none', border: 'none', padding: 0,
+                fontSize: '13px', color: '#d97706', fontWeight: 600, cursor: 'pointer',
+                textDecoration: 'underline', textDecorationColor: 'transparent',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#b45309'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#d97706'; }}
             >
-              Resetear contraseña
+              Resetear contraseña →
             </button>
             {resetMessage && (
-              <p className="mt-2 text-sm text-gray-600">{resetMessage}</p>
+              <p style={{ fontSize: '13px', color: '#64748b' }}>{resetMessage}</p>
             )}
           </div>
         )}
 
-        <div className="flex gap-3 justify-end mt-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="border border-gray-300 text-gray-700 font-semibold rounded-lg py-2 px-4 hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </button>
+        <div style={{ display: 'flex', gap: '12px', paddingTop: '4px' }}>
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            style={{
+              flex: 1,
+              background: loading ? '#93c5fd' : 'linear-gradient(135deg, #1e40af 0%, #2563eb 100%)',
+              color: '#fff', fontWeight: 700, fontSize: '14px',
+              border: 'none', borderRadius: '10px', padding: '12px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: loading ? 'none' : '0 4px 14px rgba(37,99,235,0.35)',
+            }}
           >
             {loading ? 'Guardando...' : 'Guardar'}
+          </button>
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{
+              flex: 1, background: '#fff', color: '#374151',
+              fontWeight: 600, fontSize: '14px',
+              border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '12px',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
+          >
+            Cancelar
           </button>
         </div>
       </form>

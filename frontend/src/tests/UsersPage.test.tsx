@@ -87,8 +87,8 @@ describe('UsersPage', () => {
     // Arrange & Act
     render(<UsersPage />);
 
-    // Assert — there are filter inputs in the table header
-    const filterInputs = screen.getAllByPlaceholderText(/filtrar/i);
+    // Assert — there are filter inputs with aria-labels
+    const filterInputs = screen.getAllByLabelText(/filtrar por/i);
     expect(filterInputs.length).toBeGreaterThanOrEqual(4); // login, nombre, apellidos, email
   });
 

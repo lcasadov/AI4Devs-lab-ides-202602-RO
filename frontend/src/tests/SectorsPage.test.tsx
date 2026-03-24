@@ -59,7 +59,7 @@ describe('SectorsPage', () => {
     // Arrange & Act
     render(<SectorsPage />);
     // Assert
-    const filterInputs = screen.getAllByPlaceholderText(/filtrar/i);
+    const filterInputs = screen.getAllByLabelText(/filtrar por/i);
     expect(filterInputs.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -67,7 +67,7 @@ describe('SectorsPage', () => {
     // Arrange
     mockFilterByName.mockReturnValue([sampleSectors[0]]);
     render(<SectorsPage />);
-    const filterInput = screen.getAllByPlaceholderText(/filtrar/i)[0];
+    const filterInput = screen.getByLabelText(/filtrar por nombre/i);
     // Act
     fireEvent.change(filterInput, { target: { value: 'Tech' } });
     // Assert
