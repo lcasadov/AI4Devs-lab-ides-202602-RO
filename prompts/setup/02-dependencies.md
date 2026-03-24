@@ -22,14 +22,26 @@ npm install
 
 ## Variables de entorno
 
-Crea el fichero `backend/.env` con el siguiente contenido (ajusta la password al valor de `POSTGRES_PASSWORD` en `docker-compose.yml`):
+Crea el fichero `backend/.env` con el siguiente contenido (ajusta los valores según tu entorno):
 
 ```env
+# Base de datos
 DB_PASSWORD=<password_del_docker_compose>
 DB_USER=LTIdbUser
 DB_NAME=LTIdb
 DB_PORT=5432
 DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
+
+# Autenticación JWT
+JWT_SECRET=<cadena_secreta_aleatoria_min_32_chars>
+JWT_EXPIRES_IN=8h
+
+# Email (Ethereal Mail para desarrollo)
+EMAIL_HOST=smtp.ethereal.email
+EMAIL_PORT=587
+EMAIL_USER=emmanuelle13@ethereal.email
+EMAIL_PASS=Pr7UPV5zUFDP3SSxDr
+EMAIL_FROM="LTI ATS <emmanuelle13@ethereal.email>"
 ```
 
 Crea el fichero `.env` en la raíz del proyecto para los tokens de GitHub de los agentes:
