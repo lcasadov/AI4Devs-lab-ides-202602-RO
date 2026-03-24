@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import sectorRoutes from './routes/sector.routes';
 import jobtypeRoutes from './routes/jobtype.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 import { authMiddleware } from './middleware/auth.middleware';
 
 dotenv.config();
@@ -79,6 +80,9 @@ app.use('/jobtypes', authMiddleware, jobtypeRoutes);
 
 // Candidates routes — protected by JWT
 app.use('/candidates', authMiddleware, candidateRoutes);
+
+// Dashboard routes — protected by JWT
+app.use('/dashboard', authMiddleware, dashboardRoutes);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof Error) {
