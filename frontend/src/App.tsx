@@ -12,18 +12,13 @@ import { SectorsPage } from './pages/SectorsPage';
 import { UsersPage } from './pages/UsersPage';
 
 function AppLayout(): JSX.Element {
-  const { isAuthenticated } = useAuth();
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      {isAuthenticated && <Header />}
-      <div className="flex">
-        {isAuthenticated && <Sidebar />}
-        <main
-          className={`flex-1 min-h-screen ${isAuthenticated ? 'ml-60 mt-14' : ''}`}
-        >
+    <div style={{ minHeight: '100vh', background: '#f1f5f9' }}>
+      <Header />
+      <div style={{ display: 'flex' }}>
+        <Sidebar />
+        <main style={{ flex: 1, minHeight: '100vh', marginLeft: '240px', marginTop: '56px' }}>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route
               path="/dashboard"
@@ -77,7 +72,10 @@ function App(): JSX.Element {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppLayout />
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/*" element={<AppLayout />} />
+        </Routes>
       </AuthProvider>
     </BrowserRouter>
   );

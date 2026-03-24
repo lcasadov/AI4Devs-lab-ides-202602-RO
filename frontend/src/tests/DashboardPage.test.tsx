@@ -41,7 +41,7 @@ describe('DashboardPage', () => {
     render(<DashboardPage />);
 
     // Assert
-    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toBeInTheDocument();
   });
 
   it('shows three panels with data when stats load', async () => {

@@ -6,6 +6,15 @@ import { Sector } from '../types/sector.types';
 import { sectorService } from '../services/sector.service';
 import { exportToExcel } from '../utils/exportExcel';
 
+const ff = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+
+const filterInput: React.CSSProperties = {
+  border: '1px solid #e2e8f0', borderRadius: '6px',
+  padding: '7px 10px', fontSize: '13px', color: '#374151',
+  background: '#fff', outline: 'none',
+  boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+};
+
 export function JobTypesPage(): JSX.Element {
   const { jobTypes, loading, error, loadJobTypes, createJobType, updateJobType, deleteJobType } = useJobTypes();
 
@@ -23,179 +32,119 @@ export function JobTypesPage(): JSX.Element {
   function handleFilterChange(field: keyof JobTypeFilters, value: string): void {
     const updated: JobTypeFilters = {
       ...filters,
-      [field]: field === 'sectorId'
-        ? (value === '' ? undefined : parseInt(value, 10))
-        : (value || undefined),
+      [field]: field === 'sectorId' ? (value === '' ? undefined : parseInt(value, 10)) : (value || undefined),
     };
     setFilters(updated);
     void loadJobTypes(updated);
   }
 
   function handleExportExcel(): void {
-    const rows = jobTypes.map((jt) => ({
-      nombre: jt.name,
-      sector: jt.sector.name,
-    }));
-    exportToExcel(rows, [
-      { header: 'Nombre', key: 'nombre' },
-      { header: 'Sector', key: 'sector' },
-    ], 'tipos-puesto');
+    const rows = jobTypes.map((jt) => ({ nombre: jt.name, sector: jt.sector.name }));
+    exportToExcel(rows, [{ header: 'Nombre', key: 'nombre' }, { header: 'Sector', key: 'sector' }], 'tipos-puesto');
   }
 
-  function handleNew(): void {
-    setEditingJobType(undefined);
-    setShowForm(true);
-  }
-
-  function handleEdit(jt: JobType): void {
-    setEditingJobType(jt);
-    setShowForm(true);
-  }
-
-  function handleFormSave(): void {
-    setShowForm(false);
-    setEditingJobType(undefined);
-    void loadJobTypes(filters);
-  }
-
-  function handleFormCancel(): void {
-    setShowForm(false);
-    setEditingJobType(undefined);
-  }
+  function handleNew(): void { setEditingJobType(undefined); setShowForm(true); }
+  function handleEdit(jt: JobType): void { setEditingJobType(jt); setShowForm(true); }
+  function handleFormSave(): void { setShowForm(false); setEditingJobType(undefined); void loadJobTypes(filters); }
+  function handleFormCancel(): void { setShowForm(false); setEditingJobType(undefined); }
 
   async function handleDelete(jt: JobType): Promise<void> {
-    const confirmed = window.confirm(`¿Estás seguro de que quieres eliminar el tipo de puesto "${jt.name}"?`);
-    if (!confirmed) return;
-    try {
-      await deleteJobType(jt.id);
-      void loadJobTypes(filters);
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error al eliminar el tipo de puesto');
-    }
+    if (!window.confirm(`¿Eliminar el tipo de puesto "${jt.name}"?`)) return;
+    try { await deleteJobType(jt.id); void loadJobTypes(filters); }
+    catch (err: unknown) { alert(err instanceof Error ? err.message : 'Error al eliminar'); }
   }
 
   if (showForm) {
     return (
-      <div className="p-8 flex justify-center">
-        <JobTypeForm
-          jobType={editingJobType}
-          onSave={handleFormSave}
-          onCancel={handleFormCancel}
-          onCreate={createJobType}
-          onUpdate={updateJobType}
-        />
+      <div style={{ fontFamily: ff, minHeight: '100vh', background: '#f1f5f9' }}>
+        <div style={{ background: '#1e3a5f', color: '#fff', padding: '0 32px', height: '48px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button type="button" onClick={handleFormCancel} style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', borderRadius: '6px', padding: '5px 12px', fontSize: '13px', cursor: 'pointer', fontWeight: 600 }}>← Volver</button>
+          <span style={{ fontSize: '14px', fontWeight: 600 }}>{editingJobType ? 'Editar tipo de puesto' : 'Nuevo tipo de puesto'}</span>
+        </div>
+        <div style={{ padding: '32px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)', padding: '32px', width: '100%', maxWidth: '480px' }}>
+            <JobTypeForm jobType={editingJobType} onSave={handleFormSave} onCancel={handleFormCancel} onCreate={createJobType} onUpdate={updateJobType} />
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Tipos de puesto</h1>
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            className="bg-green-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-green-700 transition-colors"
-          >
-            Exportar Excel
-          </button>
-          <button
-            type="button"
-            onClick={handleNew}
-            className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
-          >
-            + Nuevo tipo de puesto
-          </button>
+    <div style={{ fontFamily: ff, minHeight: '100vh', background: '#f1f5f9' }}>
+      <div style={{ background: '#1e3a5f', color: '#fff', padding: '0 32px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontSize: '15px', fontWeight: 700, letterSpacing: '0.3px' }}>TIPOS DE PUESTO</span>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button type="button" onClick={handleExportExcel} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontWeight: 600, fontSize: '13px', borderRadius: '7px', padding: '7px 14px', cursor: 'pointer' }}>↓ Excel</button>
+          <button type="button" onClick={handleNew} style={{ background: '#2563eb', border: 'none', color: '#fff', fontWeight: 700, fontSize: '13px', borderRadius: '7px', padding: '7px 16px', cursor: 'pointer', boxShadow: '0 2px 8px rgba(37,99,235,0.4)' }}>+ Nuevo tipo de puesto</button>
         </div>
       </div>
 
+      <div style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '12px 32px', display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+        <input type="text" placeholder="Nombre..." value={filters.name ?? ''}
+          onChange={(e) => handleFilterChange('name', e.target.value)}
+          aria-label="Filtrar por nombre" style={{ ...filterInput, width: '180px' }} />
+        <select value={filters.sectorId ?? ''} onChange={(e) => handleFilterChange('sectorId', e.target.value)}
+          aria-label="Filtrar por sector" style={{ ...filterInput, width: '180px', cursor: 'pointer' }}>
+          <option value="">Todos los sectores</option>
+          {sectors.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+        <span style={{ fontSize: '12px', color: '#94a3b8', marginLeft: 'auto' }}>
+          {jobTypes.length} registro{jobTypes.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 mb-4" role="alert">
-          {error}
-        </div>
+        <div role="alert" style={{ margin: '16px 32px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#dc2626' }}>⚠️ {error}</div>
       )}
 
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full text-sm">
-          <caption className="sr-only">Tabla de tipos de puesto</caption>
-          <thead className="bg-gray-50 border-b border-gray-200">
-            <tr>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                <div className="flex flex-col gap-1">
-                  <span>Nombre</span>
-                  <input
-                    type="text"
-                    placeholder="Filtrar..."
-                    aria-label="Filtrar por nombre"
-                    value={filters.name ?? ''}
-                    onChange={(e) => handleFilterChange('name', e.target.value)}
-                    className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">
-                <div className="flex flex-col gap-1">
-                  <span>Sector</span>
-                  <select
-                    value={filters.sectorId ?? ''}
-                    aria-label="Filtrar por sector"
-                    onChange={(e) => handleFilterChange('sectorId', e.target.value)}
-                    className="border border-gray-300 rounded px-2 py-1 text-xs font-normal focus:outline-none focus:ring-1 focus:ring-blue-500"
+      <div style={{ padding: '20px 32px' }}>
+        <div style={{ background: '#fff', borderRadius: '10px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <caption style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)' }}>Tabla de tipos de puesto</caption>
+            <thead>
+              <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                {['Nombre', 'Sector', 'Acciones'].map((h) => (
+                  <th key={h} style={{ padding: '11px 16px', textAlign: 'left', fontWeight: 600, color: '#475569', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={3} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}><span role="status">Cargando...</span></td></tr>
+              ) : jobTypes.length === 0 ? (
+                <tr><td colSpan={3} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>No hay tipos de puesto</td></tr>
+              ) : (
+                jobTypes.map((jt, i) => (
+                  <tr key={jt.id} onDoubleClick={() => handleEdit(jt)}
+                    style={{ borderBottom: i < jobTypes.length - 1 ? '1px solid #f1f5f9' : 'none', cursor: 'pointer' }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = '#f8fafc'; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.background = ''; }}
                   >
-                    <option value="">Todos</option>
-                    {sectors.map((s) => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-gray-500"><span role="status">Cargando...</span></td>
-              </tr>
-            ) : jobTypes.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-4 py-8 text-center text-gray-500">No hay tipos de puesto</td>
-              </tr>
-            ) : (
-              jobTypes.map((jt) => (
-                <tr
-                  key={jt.id}
-                  onDoubleClick={() => handleEdit(jt)}
-                  className="border-t border-gray-100 hover:bg-gray-50 cursor-pointer"
-                >
-                  <td className="px-4 py-3 text-gray-900">{jt.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{jt.sector.name}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleEdit(jt)}
-                        className="text-blue-600 hover:text-blue-800 text-xs underline"
-                        aria-label={`Editar ${jt.name}`}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { void handleDelete(jt); }}
-                        className="text-red-600 hover:text-red-800 text-xs underline"
-                        aria-label={`Eliminar ${jt.name}`}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+                    <td style={{ padding: '11px 16px', color: '#0f172a', fontWeight: 500 }}>{jt.name}</td>
+                    <td style={{ padding: '11px 16px', color: '#475569' }}>{jt.sector.name}</td>
+                    <td style={{ padding: '11px 16px' }}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button type="button" onClick={() => handleEdit(jt)} aria-label={`Editar ${jt.name}`}
+                          style={{ background: '#eff6ff', color: '#2563eb', border: 'none', borderRadius: '6px', padding: '5px 10px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#dbeafe'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = '#eff6ff'; }}>
+                          ✏ Editar
+                        </button>
+                        <button type="button" onClick={() => { void handleDelete(jt); }} aria-label={`Eliminar ${jt.name}`}
+                          style={{ background: '#fef2f2', color: '#dc2626', border: 'none', borderRadius: '6px', padding: '5px 10px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#fee2e2'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = '#fef2f2'; }}>
+                          ✕
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

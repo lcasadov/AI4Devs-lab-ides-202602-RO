@@ -140,7 +140,7 @@ describe('CandidatesPage', () => {
     renderPage();
 
     // Act
-    fireEvent.click(screen.getByText('Exportar Excel'));
+    fireEvent.click(screen.getByText('↓ Excel'));
 
     // Assert
     expect(mockExportToExcel).toHaveBeenCalledTimes(1);

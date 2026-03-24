@@ -78,7 +78,7 @@ describe('LoginPage', () => {
     // Assert
     await waitFor(() => {
       expect(screen.getByRole('alert')).toBeInTheDocument();
-      expect(screen.getByRole('alert').textContent).toMatch(/no son correctos/i);
+      expect(screen.getByRole('alert').textContent).toMatch(/incorrectos/i);
     });
   });
 
