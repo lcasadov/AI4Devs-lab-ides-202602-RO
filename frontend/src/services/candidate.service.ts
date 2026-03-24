@@ -84,10 +84,16 @@ async function update(id: number, data: UpdateCandidateData, token?: string): Pr
     ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
     : authJsonHeaders();
 
+  const payload = {
+    ...data,
+    ...(data.education !== undefined && { education: JSON.stringify(data.education) }),
+    ...(data.workExperience !== undefined && { workExperience: JSON.stringify(data.workExperience) }),
+  };
+
   const res = await fetch(`${BASE_URL}/candidates/${id}`, {
     method: 'PUT',
     headers,
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
