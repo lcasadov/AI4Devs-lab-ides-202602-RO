@@ -9,6 +9,8 @@ function createMockRepository(): jest.Mocked<ICandidateRepository> {
     findAll: jest.fn(),
     findById: jest.fn(),
     findByEmail: jest.fn(),
+    update: jest.fn(),
+    updateCvFileName: jest.fn(),
     delete: jest.fn(),
   };
 }
@@ -154,5 +156,106 @@ describe('CandidateService.getById', () => {
     expect(thrown).toBeDefined();
     expect(thrown.name).toBe('NotFoundError');
     expect(thrown.message).toMatch(/999/);
+  });
+});
+
+// ── update ────────────────────────────────────────────────────────────────────
+describe('CandidateService.update', () => {
+  let repo: jest.Mocked<ICandidateRepository>;
+  let service: CandidateService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    repo = createMockRepository();
+    service = new CandidateService(repo);
+  });
+
+  it('updates and returns the candidate when it exists', async () => {
+    // Arrange
+    const updatedRecord: Candidate = { ...candidateRecord, firstName: 'John' };
+    repo.findById.mockResolvedValue(candidateRecord);
+    repo.update.mockResolvedValue(updatedRecord);
+
+    // Act
+    const result = await service.update(1, { firstName: 'John' });
+
+    // Assert
+    expect(repo.findById).toHaveBeenCalledWith(1);
+    expect(repo.update).toHaveBeenCalledWith(1, { firstName: 'John' });
+    expect(result).toEqual(updatedRecord);
+  });
+
+  it('throws NotFoundError when candidate does not exist', async () => {
+    // Arrange
+    repo.findById.mockResolvedValue(null);
+
+    // Act & Assert
+    const thrown = await service.update(999, { firstName: 'John' }).catch((e) => e);
+    expect(thrown.name).toBe('NotFoundError');
+    expect(thrown.message).toMatch(/999/);
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it('throws DuplicateEmailError when changing to an already used email', async () => {
+    // Arrange
+    const otherCandidate: Candidate = { ...candidateRecord, id: 2, email: 'other@example.com' };
+    repo.findById.mockResolvedValue(candidateRecord);
+    repo.findByEmail.mockResolvedValue(otherCandidate);
+
+    // Act & Assert
+    const thrown = await service.update(1, { email: 'other@example.com' }).catch((e) => e);
+    expect(thrown.name).toBe('DuplicateEmailError');
+    expect(repo.update).not.toHaveBeenCalled();
+  });
+
+  it('does not check email uniqueness when email is unchanged', async () => {
+    // Arrange
+    const updatedRecord: Candidate = { ...candidateRecord, province: 'Madrid' };
+    repo.findById.mockResolvedValue(candidateRecord);
+    repo.update.mockResolvedValue(updatedRecord);
+
+    // Act
+    await service.update(1, { email: candidateRecord.email, province: 'Madrid' });
+
+    // Assert
+    expect(repo.findByEmail).not.toHaveBeenCalled();
+    expect(repo.update).toHaveBeenCalledTimes(1);
+  });
+});
+
+// ── updateCvFileName ──────────────────────────────────────────────────────────
+describe('CandidateService.updateCvFileName', () => {
+  let repo: jest.Mocked<ICandidateRepository>;
+  let service: CandidateService;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    repo = createMockRepository();
+    service = new CandidateService(repo);
+  });
+
+  it('updates the CV file name and returns the candidate', async () => {
+    // Arrange
+    const updatedRecord: Candidate = { ...candidateRecord, cvFileName: '1-1234567890.pdf' };
+    repo.findById.mockResolvedValue(candidateRecord);
+    repo.updateCvFileName.mockResolvedValue(updatedRecord);
+
+    // Act
+    const result = await service.updateCvFileName(1, '1-1234567890.pdf');
+
+    // Assert
+    expect(repo.findById).toHaveBeenCalledWith(1);
+    expect(repo.updateCvFileName).toHaveBeenCalledWith(1, '1-1234567890.pdf');
+    expect(result.cvFileName).toBe('1-1234567890.pdf');
+  });
+
+  it('throws NotFoundError when the candidate does not exist', async () => {
+    // Arrange
+    repo.findById.mockResolvedValue(null);
+
+    // Act & Assert
+    const thrown = await service.updateCvFileName(999, 'file.pdf').catch((e) => e);
+    expect(thrown.name).toBe('NotFoundError');
+    expect(repo.updateCvFileName).not.toHaveBeenCalled();
   });
 });

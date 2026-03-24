@@ -4,7 +4,7 @@ import { Header } from './components/Header';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Sidebar } from './components/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { AddCandidatePage } from './pages/AddCandidatePage';
+import { CandidatesPage } from './pages/CandidatesPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { JobTypesPage } from './pages/JobTypesPage';
 import { LoginPage } from './pages/LoginPage';
@@ -37,7 +37,7 @@ function AppLayout(): JSX.Element {
               path="/candidates"
               element={
                 <ProtectedRoute>
-                  <AddCandidatePage />
+                  <CandidatesPage />
                 </ProtectedRoute>
               }
             />

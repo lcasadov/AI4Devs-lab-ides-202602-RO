@@ -6,6 +6,8 @@ const mockPrismaCandidate = {
   create: jest.fn(),
   findMany: jest.fn(),
   findUnique: jest.fn(),
+  update: jest.fn(),
+  delete: jest.fn(),
 };
 
 jest.mock('../infrastructure/database/prisma-client', () => ({
@@ -265,5 +267,139 @@ describe('GET /candidates/:id', () => {
     expect(res.body).toHaveProperty('error');
     expect(res.body.error).toBe('Internal server error');
     expect(res.body.error).not.toMatch(/DB timeout/i);
+  });
+});
+
+// ── PUT /candidates/:id ───────────────────────────────────────────────────────
+describe('PUT /candidates/:id', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns 200 with the updated candidate', async () => {
+    // Arrange — findUnique returns existing, update returns updated
+    const updated = { ...validCandidate, firstName: 'John', province: 'Madrid' };
+    mockPrismaCandidate.findUnique.mockResolvedValue(validCandidate);
+    mockPrismaCandidate.update.mockResolvedValue(updated);
+
+    // Act
+    const res = await request(app)
+      .put('/candidates/1')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .send({ firstName: 'John', province: 'Madrid' });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ firstName: 'John', province: 'Madrid' });
+  });
+
+  it('returns 404 when candidate does not exist', async () => {
+    // Arrange
+    mockPrismaCandidate.findUnique.mockResolvedValue(null);
+
+    // Act
+    const res = await request(app)
+      .put('/candidates/999')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .send({ firstName: 'John' });
+
+    // Assert
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toMatch(/not found/i);
+  });
+
+  it('returns 409 when changing to an email already used by another candidate', async () => {
+    // Arrange — first findUnique (by id) returns existing, second (by email) returns another candidate
+    const anotherCandidate = { ...validCandidate, id: 2, email: 'other@example.com' };
+    mockPrismaCandidate.findUnique
+      .mockResolvedValueOnce(validCandidate)    // findById
+      .mockResolvedValueOnce(anotherCandidate); // findByEmail
+
+    // Act
+    const res = await request(app)
+      .put('/candidates/1')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .send({ email: 'other@example.com' });
+
+    // Assert
+    expect(res.status).toBe(409);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toMatch(/already in use/i);
+  });
+
+  it('returns 400 when phone format is invalid', async () => {
+    // Act
+    const res = await request(app)
+      .put('/candidates/1')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .send({ phone: '123456789' }); // missing +34
+
+    // Assert
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+});
+
+// ── POST /candidates/:id/cv ───────────────────────────────────────────────────
+describe('POST /candidates/:id/cv', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('returns 200 with updated candidate on valid PDF upload', async () => {
+    // Arrange
+    const updated = { ...validCandidate, cvFileName: '1-1234567890.pdf' };
+    mockPrismaCandidate.findUnique.mockResolvedValue(validCandidate);
+    mockPrismaCandidate.update.mockResolvedValue(updated);
+
+    // Act
+    const res = await request(app)
+      .post('/candidates/1/cv')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .attach('cv', Buffer.from('%PDF fake pdf content'), { filename: 'test.pdf', contentType: 'application/pdf' });
+
+    // Assert
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('cvFileName');
+  });
+
+  it('returns 400 when file type is not PDF or DOCX', async () => {
+    // Act
+    const res = await request(app)
+      .post('/candidates/1/cv')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .attach('cv', Buffer.from('fake image'), { filename: 'photo.jpg', contentType: 'image/jpeg' });
+
+    // Assert
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toMatch(/PDF and DOCX/i);
+  });
+
+  it('returns 400 when no file is uploaded', async () => {
+    // Arrange
+    mockPrismaCandidate.findUnique.mockResolvedValue(validCandidate);
+
+    // Act
+    const res = await request(app)
+      .post('/candidates/1/cv')
+      .set('Authorization', `Bearer ${recruiterToken()}`);
+
+    // Assert
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  it('returns 404 when candidate does not exist', async () => {
+    // Arrange
+    mockPrismaCandidate.findUnique.mockResolvedValue(null);
+
+    // Act
+    const res = await request(app)
+      .post('/candidates/999/cv')
+      .set('Authorization', `Bearer ${recruiterToken()}`)
+      .attach('cv', Buffer.from('%PDF fake pdf content'), { filename: 'test.pdf', contentType: 'application/pdf' });
+
+    // Assert
+    expect(res.status).toBe(404);
+    expect(res.body).toHaveProperty('error');
+    expect(res.body.error).toMatch(/not found/i);
   });
 });

@@ -1,0 +1,7 @@
+ALTER TABLE "Candidate" ADD COLUMN "postalCode" VARCHAR(10);
+ALTER TABLE "Candidate" ADD COLUMN "province" VARCHAR(100);
+ALTER TABLE "Candidate" ADD COLUMN "municipality" VARCHAR(100);
+ALTER TABLE "Candidate" ADD COLUMN "sectorId" INTEGER;
+ALTER TABLE "Candidate" ADD COLUMN "jobTypeId" INTEGER;
+ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_sectorId_fkey" FOREIGN KEY ("sectorId") REFERENCES "Sector"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "Candidate" ADD CONSTRAINT "Candidate_jobTypeId_fkey" FOREIGN KEY ("jobTypeId") REFERENCES "JobType"("id") ON DELETE SET NULL ON UPDATE CASCADE;

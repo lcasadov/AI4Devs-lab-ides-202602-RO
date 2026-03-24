@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useCreateCandidate } from '../hooks/useCreateCandidate';
 import { candidateService } from '../services/candidate.service';
-import { Candidate, CreateCandidateDto } from '../types/candidate';
+import { Candidate, CreateCandidateFormData } from '../types/candidate';
 
 // ── Mock candidateService ────────────────────────────────────────────────────
 jest.mock('../services/candidate.service', () => ({
@@ -15,7 +15,7 @@ jest.mock('../services/candidate.service', () => ({
 const mockedCreate = candidateService.create as jest.MockedFunction<typeof candidateService.create>;
 
 // ── Shared fixtures ──────────────────────────────────────────────────────────
-const baseDto: CreateCandidateDto = {
+const baseDto: CreateCandidateFormData = {
   firstName: 'Jane',
   lastName: 'Doe',
   email: 'jane.doe@example.com',

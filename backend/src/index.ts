@@ -82,12 +82,21 @@ app.use('/candidates', authMiddleware, candidateRoutes);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (err instanceof Error) {
+    // Multer file validation errors → 400
+    if (err.message === 'Only PDF and DOCX files are allowed') {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    // Multer file size exceeded → 400
+    if ('code' in err && (err as NodeJS.ErrnoException).code === 'LIMIT_FILE_SIZE') {
+      res.status(400).json({ error: 'File size exceeds the 5 MB limit' });
+      return;
+    }
     console.error(err.stack);
   } else {
     console.error(err);
   }
-  res.type('text/plain');
-  res.status(500).send('Something broke!');
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 if (require.main === module) {
