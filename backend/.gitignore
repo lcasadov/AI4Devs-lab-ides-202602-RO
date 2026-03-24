@@ -11,7 +11,8 @@ dist/
 build/
 
 # Uploads (user-uploaded files)
-uploads/
+uploads/*
+!uploads/.gitkeep
 
 # Logs
 *.log

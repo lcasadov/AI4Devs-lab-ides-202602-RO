@@ -1,5 +1,5 @@
 import { ICandidateRepository } from '../../domain/repositories/candidate.repository.interface';
-import { Candidate, CreateCandidateDto } from '../../domain/models/candidate';
+import { Candidate, CreateCandidateDto, UpdateCandidateDto } from '../../domain/models/candidate';
 
 export class DuplicateEmailError extends Error {
   constructor(_email: string) {
@@ -42,6 +42,30 @@ export class CandidateService {
       throw new NotFoundError(id);
     }
     return candidate;
+  }
+
+  async update(id: number, dto: UpdateCandidateDto): Promise<Candidate> {
+    const existing = await this.candidateRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundError(id);
+    }
+
+    if (dto.email !== undefined && dto.email !== existing.email) {
+      const emailOwner = await this.candidateRepository.findByEmail(dto.email);
+      if (emailOwner) {
+        throw new DuplicateEmailError(dto.email);
+      }
+    }
+
+    return this.candidateRepository.update(id, dto);
+  }
+
+  async updateCvFileName(id: number, cvFileName: string): Promise<Candidate> {
+    const existing = await this.candidateRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundError(id);
+    }
+    return this.candidateRepository.updateCvFileName(id, cvFileName);
   }
 
   async delete(id: number): Promise<void> {

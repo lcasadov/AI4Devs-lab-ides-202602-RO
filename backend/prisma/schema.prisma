@@ -32,20 +32,22 @@ model User {
 }
 
 model Sector {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique @db.VarChar(100)
-  jobTypes  JobType[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id         Int         @id @default(autoincrement())
+  name       String      @unique @db.VarChar(100)
+  jobTypes   JobType[]
+  candidates Candidate[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 }
 
 model JobType {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(100)
-  sectorId  Int
-  sector    Sector   @relation(fields: [sectorId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int         @id @default(autoincrement())
+  name       String      @db.VarChar(100)
+  sectorId   Int
+  sector     Sector      @relation(fields: [sectorId], references: [id])
+  candidates Candidate[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   @@unique([name, sectorId])
 }
@@ -57,6 +59,13 @@ model Candidate {
   email            String   @unique
   phone            String?
   address          String?
+  postalCode       String?  @db.VarChar(10)
+  province         String?  @db.VarChar(100)
+  municipality     String?  @db.VarChar(100)
+  sectorId         Int?
+  jobTypeId        Int?
+  sector           Sector?  @relation(fields: [sectorId], references: [id])
+  jobType          JobType? @relation(fields: [jobTypeId], references: [id])
   education        Json?
   workExperience   Json?
   cvFileName       String?
