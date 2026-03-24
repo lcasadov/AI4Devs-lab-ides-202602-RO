@@ -32,7 +32,7 @@ export function SectorsPage(): JSX.Element {
 
   function handleExportExcel(): void {
     const rows = filteredSectors.map((s) => ({ nombre: s.name }));
-    exportToExcel(rows, [{ header: 'Nombre', key: 'nombre' }], 'sectores');
+    void exportToExcel(rows, [{ header: 'Nombre', key: 'nombre' }], 'sectores');
   }
 
   function handleNew(): void { setEditingSector(undefined); setShowForm(true); }

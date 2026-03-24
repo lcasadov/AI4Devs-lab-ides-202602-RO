@@ -5,7 +5,7 @@ import { CandidateForm } from '../components/CandidateForm';
 
 // ── Mock useAuth ─────────────────────────────────────────────────────────────
 jest.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ token: 'test-token' }),
+  useAuth: () => ({ user: { login: 'admin', role: 'ADMIN' }, isAuthenticated: true, isAdmin: true }),
 }));
 
 // ── Mock sectorService ───────────────────────────────────────────────────────

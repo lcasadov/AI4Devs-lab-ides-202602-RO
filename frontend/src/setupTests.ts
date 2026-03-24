@@ -6,5 +6,7 @@ import '@testing-library/jest-dom';
 
 // Polyfill TextEncoder/TextDecoder for jsdom + react-router v7 compatibility
 import { TextEncoder, TextDecoder } from 'util';
-(global as typeof globalThis & { TextEncoder: typeof TextEncoder; TextDecoder: typeof TextDecoder }).TextEncoder = TextEncoder;
-(global as typeof globalThis & { TextEncoder: typeof TextEncoder; TextDecoder: typeof TextDecoder }).TextDecoder = TextDecoder as typeof TextDecoder;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).TextEncoder = TextEncoder;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).TextDecoder = TextDecoder;

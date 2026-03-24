@@ -28,13 +28,15 @@ export const authMiddleware: RequestHandler = (
   res: Response,
   next: NextFunction,
 ): void => {
+  // Prefer HttpOnly cookie; fall back to Authorization header for API clients / tests
+  const cookieToken = (req.cookies as Record<string, string> | undefined)?.['jwt'];
   const authHeader = req.headers['authorization'];
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  const token = cookieToken ?? (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined);
+
+  if (!token) {
     res.status(401).json({ error: 'Token requerido' });
     return;
   }
-
-  const token = authHeader.slice(7);
   const secret = process.env.JWT_SECRET;
 
   if (!secret) {

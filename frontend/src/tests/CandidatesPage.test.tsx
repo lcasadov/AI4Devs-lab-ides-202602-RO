@@ -6,7 +6,7 @@ import { Candidate } from '../types/candidate';
 
 // ── Mock useAuth ───────────────────────────────────────────────────────────────
 jest.mock('../context/AuthContext', () => ({
-  useAuth: () => ({ token: 'test-token', isAdmin: false }),
+  useAuth: () => ({ user: { login: 'user', role: 'RECRUITER' }, isAuthenticated: true, isAdmin: false }),
 }));
 
 // ── Mock useCandidates hook ───────────────────────────────────────────────────

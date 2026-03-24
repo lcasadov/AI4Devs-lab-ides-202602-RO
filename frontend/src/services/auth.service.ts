@@ -1,13 +1,13 @@
 import { AuthUser, LoginRequest, LoginResponse } from '../types/auth.types';
 
-const BASE_URL = 'http://localhost:3010';
-const TOKEN_KEY = 'lti_token';
+const BASE_URL = process.env['REACT_APP_API_URL'] ?? 'http://localhost:3010';
 const USER_KEY = 'lti_user';
 
 async function login(dto: LoginRequest): Promise<LoginResponse> {
   const res = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(dto),
   });
 
@@ -16,13 +16,16 @@ async function login(dto: LoginRequest): Promise<LoginResponse> {
   }
 
   const data = (await res.json()) as LoginResponse;
-  localStorage.setItem(TOKEN_KEY, data.token);
+  // Store only non-sensitive user info for UI display (not the JWT token)
   localStorage.setItem(USER_KEY, JSON.stringify(data.user));
   return data;
 }
 
-function logout(): void {
-  localStorage.removeItem(TOKEN_KEY);
+async function logout(): Promise<void> {
+  await fetch(`${BASE_URL}/auth/logout`, {
+    method: 'POST',
+    credentials: 'include',
+  });
   localStorage.removeItem(USER_KEY);
 }
 
@@ -30,6 +33,7 @@ async function forgotPassword(userLogin: string): Promise<void> {
   const res = await fetch(`${BASE_URL}/auth/forgot-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ login: userLogin }),
   });
 
@@ -43,13 +47,10 @@ async function changePassword(
   newPassword: string,
   confirmPassword: string,
 ): Promise<void> {
-  const token = getToken();
   const res = await fetch(`${BASE_URL}/auth/change-password`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token ?? ''}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ currentPassword, newPassword, confirmPassword }),
   });
 
@@ -57,10 +58,6 @@ async function changePassword(
     const text = await res.text();
     throw new Error(text || 'Error al cambiar la contraseña');
   }
-}
-
-function getToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
 }
 
 function getStoredUser(): AuthUser | null {
@@ -78,6 +75,5 @@ export const authService = {
   logout,
   forgotPassword,
   changePassword,
-  getToken,
   getStoredUser,
 };

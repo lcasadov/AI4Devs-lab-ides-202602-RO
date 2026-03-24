@@ -4,7 +4,6 @@ import { AuthUser, LoginRequest } from '../types/auth.types';
 
 interface AuthContextValue {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   login(dto: LoginRequest): Promise<void>;
@@ -19,33 +18,26 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedToken = authService.getToken();
+    // Restore user info from localStorage (non-sensitive display data)
     const storedUser = authService.getStoredUser();
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(storedUser);
-    }
+    if (storedUser) setUser(storedUser);
   }, []);
 
   const login = useCallback(async (dto: LoginRequest): Promise<void> => {
     const response = await authService.login(dto);
-    setToken(response.token);
     setUser(response.user);
   }, []);
 
   const logout = useCallback((): void => {
-    authService.logout();
-    setToken(null);
+    void authService.logout(); // clears HttpOnly cookie via POST /auth/logout
     setUser(null);
   }, []);
 
   const value: AuthContextValue = {
     user,
-    token,
-    isAuthenticated: token !== null,
+    isAuthenticated: user !== null,
     isAdmin: user?.role === 'ADMIN',
     login,
     logout,

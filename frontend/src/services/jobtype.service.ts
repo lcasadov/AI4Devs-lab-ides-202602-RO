@@ -1,28 +1,19 @@
 import { JobType, CreateJobTypeRequest, UpdateJobTypeRequest, JobTypeFilters } from '../types/jobtype.types';
-import { authService } from './auth.service';
 
-const BASE_URL = 'http://localhost:3010';
-
-function authHeaders(): Record<string, string> {
-  const token = authService.getToken();
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token ?? ''}`,
-  };
-}
+const BASE_URL = process.env['REACT_APP_API_URL'] ?? 'http://localhost:3010';
 
 async function getAll(filters?: Pick<JobTypeFilters, 'sectorId'>): Promise<JobType[]> {
   const params = new URLSearchParams();
   if (filters?.sectorId !== undefined) params.set('sectorId', String(filters.sectorId));
   const query = params.toString();
   const url = `${BASE_URL}/jobtypes${query ? `?${query}` : ''}`;
-  const res = await fetch(url, { headers: authHeaders() });
+  const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) throw new Error('Error al obtener los tipos de puesto');
   return res.json() as Promise<JobType[]>;
 }
 
 async function getById(id: number): Promise<JobType> {
-  const res = await fetch(`${BASE_URL}/jobtypes/${id}`, { headers: authHeaders() });
+  const res = await fetch(`${BASE_URL}/jobtypes/${id}`, { credentials: 'include' });
   if (!res.ok) throw new Error('Error al obtener el tipo de puesto');
   return res.json() as Promise<JobType>;
 }
@@ -30,7 +21,8 @@ async function getById(id: number): Promise<JobType> {
 async function create(dto: CreateJobTypeRequest): Promise<JobType> {
   const res = await fetch(`${BASE_URL}/jobtypes`, {
     method: 'POST',
-    headers: authHeaders(),
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(dto),
   });
   if (!res.ok) {
@@ -43,7 +35,8 @@ async function create(dto: CreateJobTypeRequest): Promise<JobType> {
 async function update(id: number, dto: UpdateJobTypeRequest): Promise<JobType> {
   const res = await fetch(`${BASE_URL}/jobtypes/${id}`, {
     method: 'PUT',
-    headers: authHeaders(),
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(dto),
   });
   if (!res.ok) {
@@ -56,7 +49,7 @@ async function update(id: number, dto: UpdateJobTypeRequest): Promise<JobType> {
 async function deleteJobType(id: number): Promise<void> {
   const res = await fetch(`${BASE_URL}/jobtypes/${id}`, {
     method: 'DELETE',
-    headers: authHeaders(),
+    credentials: 'include',
   });
   if (!res.ok) {
     const text = await res.text();
