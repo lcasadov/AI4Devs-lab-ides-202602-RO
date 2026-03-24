@@ -24,6 +24,8 @@ yarn-error.log*
 # IDE
 .idea
 .vscode
+.cursor
 
 # .env
-
+.env
+img
