@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import multer, { StorageEngine, FileFilterCallback } from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileTypeFromBuffer } from 'file-type';
 import { z } from 'zod';
 import { CandidateService, DuplicateEmailError, NotFoundError } from '../../application/services/candidate.service';
 import { CandidateRepository } from '../../infrastructure/repositories/candidate.repository';
@@ -40,6 +41,14 @@ const fileFilter = (
     cb(new Error('Only PDF and DOCX files are allowed'));
   }
 };
+
+const ALLOWED_EXTENSIONS = ['pdf', 'docx'];
+
+async function validateFileMagicBytes(filePath: string): Promise<boolean> {
+  const buffer = fs.readFileSync(filePath);
+  const type = await fileTypeFromBuffer(buffer);
+  return ALLOWED_EXTENSIONS.includes(type?.ext ?? '');
+}
 
 export const upload = multer({
   storage,
@@ -136,7 +145,16 @@ export async function createCandidate(req: Request, res: Response): Promise<void
       workExperience: workExperience !== undefined ? parseJsonField(workExperience) : undefined,
     };
 
-    const cvFileName = req.file?.filename;
+    let cvFileName = req.file?.filename;
+
+    if (req.file) {
+      const valid = await validateFileMagicBytes(req.file.path);
+      if (!valid) {
+        fs.unlinkSync(req.file.path);
+        res.status(400).json({ error: 'Only PDF and DOCX files are allowed' });
+        return;
+      }
+    }
 
     const candidate = await candidateService.create(dto, cvFileName);
     res.status(201).json(candidate);
@@ -257,6 +275,13 @@ export async function uploadCandidateCv(req: Request, res: Response): Promise<vo
 
     if (!req.file) {
       res.status(400).json({ error: 'No file uploaded' });
+      return;
+    }
+
+    const valid = await validateFileMagicBytes(req.file.path);
+    if (!valid) {
+      fs.unlinkSync(req.file.path);
+      res.status(400).json({ error: 'Only PDF and DOCX files are allowed' });
       return;
     }
 
