@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { UserForm } from '../components/UserForm';
 import { useUsers } from '../hooks/useUsers';
 import { User, UserFilters } from '../types/user.types';
+import { exportToExcel } from '../utils/exportExcel';
 
 export function UsersPage(): JSX.Element {
   const {
@@ -30,6 +31,23 @@ export function UsersPage(): JSX.Element {
     setFilterValues(updated);
     setFilters(updated);
     void loadUsers();
+  }
+
+  function handleExportExcel(): void {
+    const rows = users.map((u) => ({
+      login: u.login,
+      nombre: u.firstName,
+      apellidos: u.lastName,
+      email: u.email,
+      rol: u.role === 'ADMIN' ? 'Admin' : 'Recruiter',
+    }));
+    exportToExcel(rows, [
+      { header: 'Login', key: 'login' },
+      { header: 'Nombre', key: 'nombre' },
+      { header: 'Apellidos', key: 'apellidos' },
+      { header: 'Email', key: 'email' },
+      { header: 'Rol', key: 'rol' },
+    ], 'usuarios');
   }
 
   function handleNewUser(): void {
@@ -80,13 +98,22 @@ export function UsersPage(): JSX.Element {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Usuarios</h1>
-        <button
-          type="button"
-          onClick={handleNewUser}
-          className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
-        >
-          + Nuevo usuario
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="bg-green-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-green-700 transition-colors"
+          >
+            Exportar Excel
+          </button>
+          <button
+            type="button"
+            onClick={handleNewUser}
+            className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
+          >
+            + Nuevo usuario
+          </button>
+        </div>
       </div>
 
       {error && (
