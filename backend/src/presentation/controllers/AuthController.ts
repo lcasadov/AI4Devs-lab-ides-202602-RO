@@ -33,6 +33,14 @@ export async function login(req: Request, res: Response): Promise<void> {
   try {
     const authService = getAuthService();
     const result = await authService.login(parsed.data.login, parsed.data.password);
+
+    res.cookie('jwt', result.token, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 8 * 60 * 60 * 1000, // 8h — matches JWT_EXPIRES_IN
+    });
+
     res.status(200).json(result);
   } catch (err: unknown) {
     if (err instanceof Error && err.name === 'InvalidCredentialsError') {
@@ -42,6 +50,11 @@ export async function login(req: Request, res: Response): Promise<void> {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
+}
+
+export function logout(_req: Request, res: Response): void {
+  res.clearCookie('jwt', { httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV === 'production' });
+  res.status(200).json({ message: 'Logged out successfully' });
 }
 
 export async function forgotPassword(req: Request, res: Response): Promise<void> {

@@ -72,20 +72,17 @@ function StatsPanel({ title, icon, entries, color }: StatsPanelProps): JSX.Eleme
 }
 
 export function DashboardPage(): JSX.Element {
-  const { token } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) { setLoading(false); setError('No hay sesión activa'); return; }
     setLoading(true);
     setError(null);
-    getDashboardStats(token)
+    getDashboardStats()
       .then((data) => { setStats(data); })
       .catch((err: unknown) => { setError(err instanceof Error ? err.message : 'Error al cargar las estadísticas'); })
       .finally(() => { setLoading(false); });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

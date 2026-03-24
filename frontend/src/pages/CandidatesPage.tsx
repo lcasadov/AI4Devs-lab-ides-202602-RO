@@ -60,18 +60,21 @@ export function CandidatesPage(): JSX.Element {
   }, [candidates, filterFirstName, filterLastName, filterSectorId, filterJobTypeId]);
 
   function handleExportExcel(): void {
-    const rows = filteredCandidates.map((c) => ({
-      nombre: c.firstName, apellido: c.lastName, email: c.email,
-      telefono: c.phone ?? '', provincia: c.province ?? '',
-      municipio: c.municipality ?? '', sector: c.sector?.name ?? '',
-      tipoPuesto: c.jobType?.name ?? '',
-    }));
-    exportToExcel(rows, [
-      { header: 'Nombre', key: 'nombre' }, { header: 'Apellido', key: 'apellido' },
-      { header: 'Email', key: 'email' }, { header: 'Teléfono', key: 'telefono' },
-      { header: 'Provincia', key: 'provincia' }, { header: 'Municipio', key: 'municipio' },
-      { header: 'Sector', key: 'sector' }, { header: 'Tipo de Puesto', key: 'tipoPuesto' },
-    ], 'candidatos');
+    void exportToExcel(
+      filteredCandidates.map((c) => ({
+        nombre: c.firstName, apellido: c.lastName, email: c.email,
+        telefono: c.phone ?? '', provincia: c.province ?? '',
+        municipio: c.municipality ?? '', sector: c.sector?.name ?? '',
+        tipoPuesto: c.jobType?.name ?? '',
+      })),
+      [
+        { header: 'Nombre', key: 'nombre' }, { header: 'Apellido', key: 'apellido' },
+        { header: 'Email', key: 'email' }, { header: 'Teléfono', key: 'telefono' },
+        { header: 'Provincia', key: 'provincia' }, { header: 'Municipio', key: 'municipio' },
+        { header: 'Sector', key: 'sector' }, { header: 'Tipo de Puesto', key: 'tipoPuesto' },
+      ],
+      'candidatos',
+    );
   }
 
   function handleNew(): void { setEditingCandidate(undefined); setShowForm(true); }

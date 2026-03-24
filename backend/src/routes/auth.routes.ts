@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
 import { authMiddleware } from '../middleware/auth.middleware';
-import { login, forgotPassword, changePassword } from '../presentation/controllers/AuthController';
+import { login, logout, forgotPassword, changePassword } from '../presentation/controllers/AuthController';
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -171,5 +171,17 @@ router.post('/forgot-password', authLimiter, forgotPassword);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.put('/change-password', authMiddleware, changePassword);
+
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Logout — clears the JWT cookie
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ */
+router.post('/logout', logout);
 
 export default router;

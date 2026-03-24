@@ -40,7 +40,7 @@ export function JobTypesPage(): JSX.Element {
 
   function handleExportExcel(): void {
     const rows = jobTypes.map((jt) => ({ nombre: jt.name, sector: jt.sector.name }));
-    exportToExcel(rows, [{ header: 'Nombre', key: 'nombre' }, { header: 'Sector', key: 'sector' }], 'tipos-puesto');
+    void exportToExcel(rows, [{ header: 'Nombre', key: 'nombre' }, { header: 'Sector', key: 'sector' }], 'tipos-puesto');
   }
 
   function handleNew(): void { setEditingJobType(undefined); setShowForm(true); }
