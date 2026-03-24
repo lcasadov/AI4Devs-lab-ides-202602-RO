@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sector, CreateSectorRequest, UpdateSectorRequest } from '../types/sector.types';
 
 interface SectorFormProps {
@@ -15,6 +15,16 @@ export function SectorForm({ sector, onSave, onCancel, onCreate, onUpdate }: Sec
   const [saving, setSaving] = useState(false);
 
   const isEditing = sector !== undefined;
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key === 'Escape') {
+        onCancel();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
 
   async function handleSubmit(e: React.FormEvent): Promise<void> {
     e.preventDefault();
