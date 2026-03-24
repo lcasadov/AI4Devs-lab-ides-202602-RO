@@ -6,6 +6,7 @@ import { jobtypeService } from '../services/jobtype.service';
 import { Candidate } from '../types/candidate';
 import { Sector } from '../types/sector.types';
 import { JobType } from '../types/jobtype.types';
+import { exportToExcel } from '../utils/exportExcel';
 
 export function CandidatesPage(): JSX.Element {
   const { candidates, isLoading, error, loadCandidates, deleteCandidate } = useCandidates();
@@ -67,6 +68,29 @@ export function CandidatesPage(): JSX.Element {
     });
   }, [candidates, filterFirstName, filterLastName, filterSectorId, filterJobTypeId]);
 
+  function handleExportExcel(): void {
+    const rows = filteredCandidates.map((c) => ({
+      nombre: c.firstName,
+      apellido: c.lastName,
+      email: c.email,
+      telefono: c.phone ?? '',
+      provincia: c.province ?? '',
+      municipio: c.municipality ?? '',
+      sector: c.sector?.name ?? '',
+      tipoPuesto: c.jobType?.name ?? '',
+    }));
+    exportToExcel(rows, [
+      { header: 'Nombre', key: 'nombre' },
+      { header: 'Apellido', key: 'apellido' },
+      { header: 'Email', key: 'email' },
+      { header: 'Teléfono', key: 'telefono' },
+      { header: 'Provincia', key: 'provincia' },
+      { header: 'Municipio', key: 'municipio' },
+      { header: 'Sector', key: 'sector' },
+      { header: 'Tipo de Puesto', key: 'tipoPuesto' },
+    ], 'candidatos');
+  }
+
   function handleNew(): void {
     setEditingCandidate(undefined);
     setShowForm(true);
@@ -124,13 +148,22 @@ export function CandidatesPage(): JSX.Element {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Candidatos</h1>
-        <button
-          type="button"
-          onClick={handleNew}
-          className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
-        >
-          + Nuevo candidato
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="bg-green-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-green-700 transition-colors"
+          >
+            Exportar Excel
+          </button>
+          <button
+            type="button"
+            onClick={handleNew}
+            className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
+          >
+            + Nuevo candidato
+          </button>
+        </div>
       </div>
 
       {error && (

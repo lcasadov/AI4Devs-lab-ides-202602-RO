@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { SectorForm } from '../components/SectorForm';
 import { useSectors } from '../hooks/useSectors';
 import { Sector } from '../types/sector.types';
+import { exportToExcel } from '../utils/exportExcel';
 
 export function SectorsPage(): JSX.Element {
   const { loading, error, loadSectors, createSector, updateSector, deleteSector, filterByName } = useSectors();
@@ -23,6 +24,11 @@ export function SectorsPage(): JSX.Element {
   function handleFilterChange(value: string): void {
     setNameFilter(value);
     setFilteredSectors(filterByName(value));
+  }
+
+  function handleExportExcel(): void {
+    const rows = filteredSectors.map((s) => ({ nombre: s.name }));
+    exportToExcel(rows, [{ header: 'Nombre', key: 'nombre' }], 'sectores');
   }
 
   function handleNew(): void {
@@ -75,13 +81,22 @@ export function SectorsPage(): JSX.Element {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Sectores</h1>
-        <button
-          type="button"
-          onClick={handleNew}
-          className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
-        >
-          + Nuevo sector
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="bg-green-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-green-700 transition-colors"
+          >
+            Exportar Excel
+          </button>
+          <button
+            type="button"
+            onClick={handleNew}
+            className="bg-blue-600 text-white font-semibold rounded-lg py-2 px-4 hover:bg-blue-700 transition-colors"
+          >
+            + Nuevo sector
+          </button>
+        </div>
       </div>
 
       {error && (
