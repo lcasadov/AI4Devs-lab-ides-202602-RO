@@ -45,7 +45,7 @@ export function AddCandidatePage(): JSX.Element {
             </button>
           </div>
         ) : (
-          <CandidateForm key={formKey} onSuccess={handleSuccess} />
+          <CandidateForm key={formKey} onSuccess={handleSuccess} onCancel={() => navigate('/dashboard')} />
         )}
       </div>
     </div>
