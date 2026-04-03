@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Candidate, CreateCandidateFormData, UpdateCandidateData } from '../types/candidate';
 import { candidateService } from '../services/candidate.service';
-import { useAuth } from '../context/AuthContext';
 
 interface UseCandidatesState {
   candidates: Candidate[];
@@ -16,7 +15,6 @@ export function useCandidates(): UseCandidatesState & {
   deleteCandidate: (id: number) => Promise<void>;
   uploadCv: (id: number, file: File) => Promise<void>;
 } {
-  const { token } = useAuth();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,34 +23,34 @@ export function useCandidates(): UseCandidatesState & {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await candidateService.getAll(token ?? undefined);
+      const data = await candidateService.getAll();
       setCandidates(data);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al cargar candidatos');
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, []);
 
   const createCandidate = useCallback(async (data: CreateCandidateFormData): Promise<void> => {
-    await candidateService.create(data, token ?? undefined);
+    await candidateService.create(data);
     await loadCandidates();
-  }, [token, loadCandidates]);
+  }, [loadCandidates]);
 
   const updateCandidate = useCallback(async (id: number, data: UpdateCandidateData): Promise<void> => {
-    await candidateService.update(id, data, token ?? undefined);
+    await candidateService.update(id, data);
     await loadCandidates();
-  }, [token, loadCandidates]);
+  }, [loadCandidates]);
 
   const deleteCandidate = useCallback(async (id: number): Promise<void> => {
-    await candidateService.delete(id, token ?? undefined);
+    await candidateService.delete(id);
     await loadCandidates();
-  }, [token, loadCandidates]);
+  }, [loadCandidates]);
 
   const uploadCv = useCallback(async (id: number, file: File): Promise<void> => {
-    await candidateService.uploadCv(id, file, token ?? undefined);
+    await candidateService.uploadCv(id, file);
     await loadCandidates();
-  }, [token, loadCandidates]);
+  }, [loadCandidates]);
 
   return {
     candidates,

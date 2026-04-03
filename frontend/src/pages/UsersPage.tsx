@@ -34,7 +34,7 @@ export function UsersPage(): JSX.Element {
       login: u.login, nombre: u.firstName, apellidos: u.lastName,
       email: u.email, rol: u.role === 'ADMIN' ? 'Admin' : 'Recruiter',
     }));
-    exportToExcel(rows, [
+    void exportToExcel(rows, [
       { header: 'Login', key: 'login' }, { header: 'Nombre', key: 'nombre' },
       { header: 'Apellidos', key: 'apellidos' }, { header: 'Email', key: 'email' },
       { header: 'Rol', key: 'rol' },

@@ -1,28 +1,9 @@
-import { authService } from './auth.service';
 import { Candidate, CreateCandidateFormData, UpdateCandidateData } from '../types/candidate';
 
 const BASE_URL = process.env['REACT_APP_API_URL'] ?? 'http://localhost:3010';
 
-function authBearerHeaders(): Record<string, string> {
-  const token = authService.getToken();
-  return {
-    Authorization: `Bearer ${token ?? ''}`,
-  };
-}
-
-function authJsonHeaders(): Record<string, string> {
-  const token = authService.getToken();
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token ?? ''}`,
-  };
-}
-
-async function getAll(token?: string): Promise<Candidate[]> {
-  const headers: Record<string, string> = token
-    ? { Authorization: `Bearer ${token}` }
-    : authBearerHeaders();
-  const res = await fetch(`${BASE_URL}/candidates`, { headers });
+async function getAll(): Promise<Candidate[]> {
+  const res = await fetch(`${BASE_URL}/candidates`, { credentials: 'include' });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Error al obtener candidatos: ${res.status} ${text}`);
@@ -30,11 +11,8 @@ async function getAll(token?: string): Promise<Candidate[]> {
   return res.json() as Promise<Candidate[]>;
 }
 
-async function getById(id: number, token?: string): Promise<Candidate> {
-  const headers: Record<string, string> = token
-    ? { Authorization: `Bearer ${token}` }
-    : authBearerHeaders();
-  const res = await fetch(`${BASE_URL}/candidates/${id}`, { headers });
+async function getById(id: number): Promise<Candidate> {
+  const res = await fetch(`${BASE_URL}/candidates/${id}`, { credentials: 'include' });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Error al obtener candidato: ${res.status} ${text}`);
@@ -42,11 +20,7 @@ async function getById(id: number, token?: string): Promise<Candidate> {
   return res.json() as Promise<Candidate>;
 }
 
-async function create(data: CreateCandidateFormData, token?: string): Promise<Candidate> {
-  const headers: Record<string, string> = token
-    ? { Authorization: `Bearer ${token}` }
-    : authBearerHeaders();
-
+async function create(data: CreateCandidateFormData): Promise<Candidate> {
   const formData = new FormData();
   formData.append('firstName', data.firstName);
   formData.append('lastName', data.lastName);
@@ -64,14 +38,12 @@ async function create(data: CreateCandidateFormData, token?: string): Promise<Ca
 
   const res = await fetch(`${BASE_URL}/candidates`, {
     method: 'POST',
-    headers,
+    credentials: 'include',
     body: formData,
   });
 
   if (!res.ok) {
-    if (res.status === 409) {
-      throw new Error('Este email ya está registrado');
-    }
+    if (res.status === 409) throw new Error('Este email ya está registrado');
     const text = await res.text();
     throw new Error(`Error al crear candidato: ${res.status} ${text}`);
   }
@@ -79,11 +51,7 @@ async function create(data: CreateCandidateFormData, token?: string): Promise<Ca
   return res.json() as Promise<Candidate>;
 }
 
-async function update(id: number, data: UpdateCandidateData, token?: string): Promise<Candidate> {
-  const headers: Record<string, string> = token
-    ? { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
-    : authJsonHeaders();
-
+async function update(id: number, data: UpdateCandidateData): Promise<Candidate> {
   const payload = {
     ...data,
     ...(data.education !== undefined && { education: JSON.stringify(data.education) }),
@@ -92,17 +60,14 @@ async function update(id: number, data: UpdateCandidateData, token?: string): Pr
 
   const res = await fetch(`${BASE_URL}/candidates/${id}`, {
     method: 'PUT',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    if (res.status === 404) {
-      throw new Error('Candidato no encontrado');
-    }
-    if (res.status === 409) {
-      throw new Error('Este email ya está registrado');
-    }
+    if (res.status === 404) throw new Error('Candidato no encontrado');
+    if (res.status === 409) throw new Error('Este email ya está registrado');
     const text = await res.text();
     throw new Error(`Error al actualizar candidato: ${res.status} ${text}`);
   }
@@ -110,24 +75,18 @@ async function update(id: number, data: UpdateCandidateData, token?: string): Pr
   return res.json() as Promise<Candidate>;
 }
 
-async function uploadCv(id: number, file: File, token?: string): Promise<Candidate> {
-  const headers: Record<string, string> = token
-    ? { Authorization: `Bearer ${token}` }
-    : authBearerHeaders();
-
+async function uploadCv(id: number, file: File): Promise<Candidate> {
   const formData = new FormData();
   formData.append('cv', file);
 
   const res = await fetch(`${BASE_URL}/candidates/${id}/cv`, {
     method: 'POST',
-    headers,
+    credentials: 'include',
     body: formData,
   });
 
   if (!res.ok) {
-    if (res.status === 404) {
-      throw new Error('Candidato no encontrado');
-    }
+    if (res.status === 404) throw new Error('Candidato no encontrado');
     const text = await res.text();
     throw new Error(`Error al subir CV: ${res.status} ${text}`);
   }
@@ -135,20 +94,14 @@ async function uploadCv(id: number, file: File, token?: string): Promise<Candida
   return res.json() as Promise<Candidate>;
 }
 
-async function deleteCandidate(id: number, token?: string): Promise<void> {
-  const headers: Record<string, string> = token
-    ? { Authorization: `Bearer ${token}` }
-    : authBearerHeaders();
-
+async function deleteCandidate(id: number): Promise<void> {
   const res = await fetch(`${BASE_URL}/candidates/${id}`, {
     method: 'DELETE',
-    headers,
+    credentials: 'include',
   });
 
   if (!res.ok) {
-    if (res.status === 404) {
-      throw new Error('Candidato no encontrado');
-    }
+    if (res.status === 404) throw new Error('Candidato no encontrado');
     const text = await res.text();
     throw new Error(`Error al eliminar candidato: ${res.status} ${text}`);
   }

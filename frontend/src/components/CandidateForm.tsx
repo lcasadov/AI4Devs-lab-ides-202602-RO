@@ -1,5 +1,4 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { sectorService } from '../services/sector.service';
 import { jobtypeService } from '../services/jobtype.service';
 import { candidateService } from '../services/candidate.service';
@@ -95,7 +94,6 @@ function SectionTitle({ children }: { children: React.ReactNode }): JSX.Element 
 }
 
 export function CandidateForm({ candidate, onSuccess, onCancel }: CandidateFormProps): JSX.Element {
-  const { token } = useAuth();
   const isEditMode = candidate !== undefined;
 
   const [fields, setFields] = useState<BasicFields>({
@@ -241,7 +239,7 @@ export function CandidateForm({ candidate, onSuccess, onCancel }: CandidateFormP
           education: education.length > 0 ? education : undefined,
           workExperience: workExperience.length > 0 ? workExperience : undefined,
         };
-        await candidateService.update(candidate.id, updateData, token ?? undefined);
+        await candidateService.update(candidate.id, updateData);
       } else {
         const createData: CreateCandidateFormData = {
           firstName: fields.firstName.trim(),
@@ -257,7 +255,7 @@ export function CandidateForm({ candidate, onSuccess, onCancel }: CandidateFormP
           education: education.length > 0 ? education : undefined,
           workExperience: workExperience.length > 0 ? workExperience : undefined,
         };
-        await candidateService.create(createData, token ?? undefined);
+        await candidateService.create(createData);
       }
       onSuccess();
     } catch (err: unknown) {
@@ -286,7 +284,7 @@ export function CandidateForm({ candidate, onSuccess, onCancel }: CandidateFormP
     setCvError(null);
     setCvSuccess(false);
     try {
-      await candidateService.uploadCv(candidate.id, cvFile, token ?? undefined);
+      await candidateService.uploadCv(candidate.id, cvFile);
       setCvSuccess(true);
       setCvFile(undefined);
     } catch (err: unknown) {

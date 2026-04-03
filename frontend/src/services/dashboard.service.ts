@@ -11,9 +11,9 @@ export interface DashboardStats {
   byMunicipality: StatEntry[];
 }
 
-export async function getDashboardStats(token: string): Promise<DashboardStats> {
+export async function getDashboardStats(): Promise<DashboardStats> {
   const res = await fetch(`${API_BASE}/dashboard/stats`, {
-    headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include',
   });
   if (!res.ok) {
     throw new Error(`Failed to fetch dashboard stats: ${res.status}`);
